@@ -1,0 +1,6 @@
+Options -Indexes
+DirectoryIndex index.html
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 403 ^/(.*/)?data/
