@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>សៀវភៅពិន្ទុសិស្ស</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Moul&display=swap">
+<style>
+/* Layout: a school register — navy header band with class/period pickers, then a ledger-style score grid with a sticky name column and a summary block underneath, mirroring the paper/Excel sheet. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunk:#eef1f6; --line:#d9dfe8; --line-strong:#b9c3d3;
+  --ink:#18202d; --muted:#5b6678; --navy:#1f3a68; --navy-ink:#ffffff; --navy-soft:#e3e9f4;
+  --marigold:#c98a12; --marigold-soft:#fbf1dc;
+  --gA:#1d7a4c; --gA-bg:#e1f3ea; --gB:#16707d; --gB-bg:#def1f3; --gC:#2c5aa0; --gC-bg:#e3ebf8;
+  --gD:#9a6400; --gD-bg:#fbefd6; --gE:#b3352b; --gE-bg:#fbe4e1; --gF:#5b6678; --gF-bg:#eceff3;
+  --bad:#b3352b; --bad-bg:#fbe4e1;
+  --f-body:"Kantumruy Pro","Noto Sans Khmer","Khmer OS System","Leelawadee UI",system-ui,sans-serif;
+  --f-display:"Moul","Khmer OS Muol Light","Kantumruy Pro",serif;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151d; --surface:#171e29; --sunk:#1d2532; --line:#2b3546; --line-strong:#3c495e;
+  --ink:#e7ebf2; --muted:#9aa5b8; --navy:#26467c; --navy-ink:#ffffff; --navy-soft:#22314a;
+  --marigold:#e6ad45; --marigold-soft:#3a2f17;
+  --gA:#6fd3a0; --gA-bg:#173628; --gB:#6ccbd6; --gB-bg:#163339; --gC:#8fb3ef; --gC-bg:#1c2b45;
+  --gD:#eabd63; --gD-bg:#3a2e14; --gE:#f08a80; --gE-bg:#3d1f1c; --gF:#9aa5b8; --gF-bg:#232b37;
+  --bad:#f08a80; --bad-bg:#3d1f1c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151d; --surface:#171e29; --sunk:#1d2532; --line:#2b3546; --line-strong:#3c495e;
+  --ink:#e7ebf2; --muted:#9aa5b8; --navy:#26467c; --navy-ink:#ffffff; --navy-soft:#22314a;
+  --marigold:#e6ad45; --marigold-soft:#3a2f17;
+  --gA:#6fd3a0; --gA-bg:#173628; --gB:#6ccbd6; --gB-bg:#163339; --gC:#8fb3ef; --gC-bg:#1c2b45;
+  --gD:#eabd63; --gD-bg:#3a2e14; --gE:#f08a80; --gE-bg:#3d1f1c; --gF:#9aa5b8; --gF-bg:#232b37;
+  --bad:#f08a80; --bad-bg:#3d1f1c; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+.band{background:var(--navy);color:var(--navy-ink)}
+.band-in{max-width:1400px;margin:0 auto;padding-block:18px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.brand h1{font-family:var(--f-display);font-weight:400;font-size:1.35rem;line-height:1.9;margin:0;text-wrap:balance}
+.brand p{margin:0;opacity:.8;font-size:.85rem}
+.pickers{display:flex;flex-wrap:wrap;gap:10px}
+.pick{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pick label{font-size:.75rem;opacity:.8;letter-spacing:.02em}
+.pick select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:6px;padding:6px 10px;min-width:150px;max-width:100%}
+.pick select option{color:#18202d;background:#fff}
+.who{display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;gap:2px;font-size:.8rem;order:2}
+.who button{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:6px;padding:2px 10px;cursor:pointer;font-size:.8rem}
+.locked .tabs,.locked .pick{display:none}
+.tabs{display:flex;gap:4px;margin-top:16px;overflow-x:auto}
+.tab{background:none;border:0;color:rgba(255,255,255,.75);padding:10px 16px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;font-weight:500}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--marigold);outline-offset:1px}
+
+main{max-width:1400px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.note{background:var(--marigold-soft);border:1px solid var(--marigold);color:var(--ink);padding:10px 14px;border-radius:var(--r);font-size:.9rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.panel h2{margin:0 0 4px;font-size:1.05rem;font-weight:600}
+.panel .sub{margin:0 0 14px;color:var(--muted);font-size:.88rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spacer{flex:1}
+.btn{border:1px solid var(--line-strong);background:var(--surface);padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{color:var(--bad)}
+.btn.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:3px 10px;font-size:.85rem}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.field label{font-size:.8rem;color:var(--muted)}
+.inp{border:1px solid var(--line-strong);background:var(--surface);border-radius:6px;padding:7px 10px;min-width:0}
+.status{font-size:.82rem;color:var(--muted)}
+.status.err{color:var(--bad)}
+
+/* summary strip */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat .k{font-size:.8rem;color:var(--muted)}
+.stat .v{font-size:1.5rem;font-weight:600;line-height:1.3}
+.stat .s{font-size:.8rem;color:var(--muted)}
+.dist{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--sunk);margin-top:8px}
+.dist span{display:block;height:100%}
+
+/* grade grid */
+.gridwrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);max-height:75vh}
+table.grid{border-collapse:separate;border-spacing:0;font-size:.88rem;min-width:100%}
+.grid th,.grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;text-align:center;white-space:nowrap}
+.grid thead th{background:var(--navy-soft);position:sticky;top:0;z-index:2;font-weight:600;padding:6px 6px;vertical-align:bottom}
+.grid thead tr.r2 th{top:var(--h1,34px)}
+.grid th.grp{font-size:.78rem;color:var(--muted);font-weight:500;border-bottom-color:var(--line-strong)}
+.grid th.subj{writing-mode:vertical-rl;transform:rotate(180deg);height:150px;font-size:.82rem;font-weight:500;padding:6px 4px;text-align:left}
+.grid .c-no{width:40px;color:var(--muted)}
+.grid .c-name{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;padding:4px 10px;min-width:170px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.grid thead .c-name{z-index:3;background:var(--navy-soft)}
+.grid .c-g{width:38px}
+.grid td.cell input{width:46px;border:0;background:transparent;text-align:center;padding:6px 2px;font-variant-numeric:tabular-nums}
+.grid td.cell input:focus{background:var(--marigold-soft);outline:2px solid var(--marigold);outline-offset:-2px}
+.grid td.cell input.bad{background:var(--bad-bg);color:var(--bad)}
+.grid td.cell input.low{color:var(--gE)}
+.grid td.calc{padding:4px 8px;font-variant-numeric:tabular-nums;background:var(--sunk)}
+.grid td.avg{font-weight:600}
+.grid tbody tr:hover td{background-color:color-mix(in srgb,var(--navy-soft) 45%,transparent)}
+.grid tbody tr:hover td.c-name{background:var(--navy-soft)}
+.grid tfoot td{background:var(--sunk);font-weight:500;padding:5px 4px;font-variant-numeric:tabular-nums;position:sticky;bottom:0}
+.grid tfoot td.c-name{background:var(--sunk);z-index:2}
+.rank{display:inline-block;min-width:26px}
+.rank.top{background:var(--marigold);color:#fff;border-radius:999px;padding:0 6px;font-weight:600}
+.gpill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:1px 9px;font-size:.8rem;font-weight:600}
+.gpill b{font-weight:700}
+.gpill.A{background:var(--gA-bg);color:var(--gA)}.gpill.B{background:var(--gB-bg);color:var(--gB)}.gpill.C{background:var(--gC-bg);color:var(--gC)}
+.gpill.D{background:var(--gD-bg);color:var(--gD)}.gpill.E{background:var(--gE-bg);color:var(--gE)}.gpill.F{background:var(--gF-bg);color:var(--gF)}
+.sw-A{background:var(--gA)}.sw-B{background:var(--gB)}.sw-C{background:var(--gC)}.sw-D{background:var(--gD)}.sw-E{background:var(--gE)}.sw-F{background:var(--gF)}
+.hint{font-size:.8rem;color:var(--muted)}
+
+/* summary table like the old sheet */
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.sumgrid{grid-template-columns:1fr}}
+.tbl{overflow-x:auto}
+table.plain{border-collapse:collapse;width:100%;font-size:.9rem}
+.plain th,.plain td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+.plain th{color:var(--muted);font-weight:500;font-size:.8rem}
+.plain td.n{text-align:right;font-variant-numeric:tabular-nums}
+
+/* students */
+.slist{display:flex;flex-direction:column;gap:0}
+.srow{display:grid;grid-template-columns:36px minmax(0,1fr) 92px auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.srow .no{color:var(--muted);text-align:right}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+textarea.inp{width:100%;min-height:150px;resize:vertical}
+
+/* report card */
+.rc-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.rc-layout{grid-template-columns:1fr}}
+.rc-list{display:flex;flex-direction:column;max-height:70vh;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.rc-item{display:flex;gap:8px;align-items:center;padding:8px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer}
+.rc-item:hover{background:var(--sunk)}
+.rc-item[aria-current="true"]{background:var(--navy-soft);font-weight:600}
+.rc-item .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line-strong);border-radius:4px;padding:28px clamp(16px,4vw,40px)}
+.card .kingdom{text-align:center;font-family:var(--f-display);font-size:.95rem;line-height:2}
+.card .motto{text-align:center;font-size:.85rem;color:var(--muted)}
+.card h3{text-align:center;font-family:var(--f-display);font-weight:400;font-size:1.1rem;margin:18px 0 6px;line-height:2}
+.card .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 20px;margin:14px 0 16px;font-size:.92rem}
+.card .meta span{color:var(--muted)}
+.card .res{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:16px}
+.card .res div{border:1px solid var(--line);border-radius:6px;padding:8px 12px}
+.card .res .k{font-size:.78rem;color:var(--muted)}
+.card .res .v{font-size:1.2rem;font-weight:600}
+.sign{display:flex;justify-content:space-between;gap:20px;margin-top:34px;font-size:.88rem;flex-wrap:wrap}
+.sign div{text-align:center;min-width:160px}
+.sign div p{margin:0 0 50px}
+
+/* settings */
+.sub-row{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,140px) auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)}
+.cls-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 110px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+@media (max-width:640px){.cls-row{grid-template-columns:1fr 1fr}.sub-row{grid-template-columns:28px minmax(0,1fr) auto}.sub-row .grpin{display:none}}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.empty h2{color:var(--ink)}
+/* honor roll — a printed certificate, so it keeps one paper look in both themes */
+:root{--hs-paper:#ffffff;--hs-navy:#1c3566;--hs-red:#b3261e;--hs-gold:#c9971c;--hs-gold2:#f3d27a;--hs-ink:#1b2230;--hs-soft:#eef2f9}
+.hon-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.hon-layout{grid-template-columns:1fr}}
+.hon-form{display:flex;flex-direction:column;gap:12px}
+.hon-form h3{margin:6px 0 0;font-size:.92rem;font-weight:600}
+.hs-wrap{width:100%;position:relative;overflow:hidden;border-radius:4px;box-shadow:0 2px 16px rgba(0,0,0,.18)}
+.hs{width:794px;height:1123px;background:var(--hs-paper);color:var(--hs-ink);position:absolute;left:0;top:0;transform-origin:top left;font-family:var(--f-body)}
+.hs-frame{position:absolute;inset:22px;border:3px double var(--hs-navy);outline:1px solid var(--hs-gold);outline-offset:-9px;padding:26px 34px 22px;display:flex;flex-direction:column;
+  background:radial-gradient(circle at 50% 52%,var(--hs-soft) 0,var(--hs-paper) 60%)}
+.hs-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.hs-school{width:220px;text-align:center}
+.hs-logo{width:96px;height:96px;margin:0 auto 4px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--hs-soft);color:var(--hs-navy);font-size:11px;border:1px dashed var(--hs-navy)}
+.hs-logo.has{border:0;background:none}
+.hs-logo img{width:100%;height:100%;object-fit:contain}
+.hs-skh{font-family:var(--f-display);font-size:13px;color:var(--hs-navy);line-height:2}
+.hs-sen{font-size:12px;color:var(--hs-red);font-weight:600}
+.hs-kingdom{text-align:center;font-family:var(--f-display);color:var(--hs-navy);font-size:15px;line-height:2.1;padding-top:6px}
+.hs-kingdom .orn{font-family:var(--f-body);color:var(--hs-gold);letter-spacing:6px;font-size:13px;line-height:1}
+.hs-title{font-family:var(--f-display);font-weight:400;text-align:center;color:var(--hs-navy);font-size:30px;line-height:2;margin:10px 0 0}
+.hs-sub{font-family:var(--f-display);text-align:center;color:var(--hs-red);font-size:17px;line-height:2}
+.hs-podium{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;padding:6px 0}
+.hs-row{display:flex;justify-content:space-around;align-items:flex-start}
+.hs-row.one{justify-content:center}
+.hs-slot{display:flex;flex-direction:column;align-items:center;width:var(--sw,200px)}
+.hs-photo{position:relative;width:var(--pw,128px);aspect-ratio:4/5;max-width:100%;background:var(--hs-soft);border:5px solid var(--hs-paper);box-shadow:0 0 0 2px var(--hs-gold),0 6px 14px rgba(20,30,60,.25);display:flex;align-items:center;justify-content:center;color:var(--hs-navy);font-size:12px;text-align:center}
+.hs-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.hs-photo.edit{cursor:pointer}
+.hs-photo.edit:hover::after{content:"ប្ដូររូបថត";position:absolute;inset:0;background:rgba(28,53,102,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+.hs-medal{position:absolute;right:calc(var(--mw,46px) / -2);bottom:-12px;width:var(--mw,46px);height:var(--mw,46px);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--hs-gold2),var(--hs-gold) 70%);border:3px solid var(--hs-navy);color:var(--hs-navy);
+  font-family:var(--f-display);display:flex;align-items:center;justify-content:center;font-size:calc(var(--mw,46px) * .42);line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.hs-name{margin-top:16px;background:var(--hs-navy);color:#fff;padding:3px 18px;border-radius:3px;font-weight:600;font-size:15px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:inset 0 0 0 1px var(--hs-gold)}
+.hs-score{font-size:12px;color:var(--hs-navy);margin-top:2px}
+.hs-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;font-size:13px;margin-top:6px}
+.hs-foot .col{text-align:center;min-width:230px}
+.hs-foot .ttl{font-family:var(--f-display);color:var(--hs-navy);font-size:13px;line-height:2;margin-top:2px}
+.hs-foot .sp{height:62px}
+.hs-foot .nm{font-weight:700;color:var(--hs-navy)}
+.hs-dots{color:#7a8496}
+.hs-empty{text-align:center;color:#7a8496;font-size:16px;padding:60px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;font-size:.9rem;z-index:20}
+@media (prefers-reduced-motion:no-preference){.tab,.btn{transition:background .15s}}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="band-in">
+    <div class="top">
+      <div class="brand">
+        <h1>សៀវភៅពិន្ទុសិស្ស</h1>
+        <p>កម្មវិធីសិក្សាភាសាខ្មែរ · ពិន្ទុពេញ ១០</p>
+      </div>
+      <div class="pickers">
+        <div class="who" id="who" hidden></div>
+        <div class="pick"><label for="selClass">ថ្នាក់</label><select id="selClass"></select></div>
+        <div class="pick"><label for="selPeriod">ខែ / ឆមាស</label><select id="selPeriod"></select></div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="scores" aria-selected="true">បញ្ចូលពិន្ទុ</button>
+      <button class="tab" role="tab" data-tab="students" aria-selected="false">បញ្ជីសិស្ស</button>
+      <button class="tab" role="tab" data-tab="report" aria-selected="false">ព្រឹត្តិបត្រពិន្ទុ</button>
+      <button class="tab" role="tab" data-tab="honor" aria-selected="false">តារាងកិត្តិយស</button>
+      <button class="tab" role="tab" data-tab="settings" aria-selected="false">ថ្នាក់ និងមុខវិជ្ជា</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="empty"><h2>កំពុងផ្ទុកទិន្នន័យ…</h2><p>សូមរង់ចាំបន្តិច</p></div>
+</main>
+<input type="file" id="fileImport" accept=".xlsx,.xls" hidden>
+<input type="file" id="filePhoto" accept="image/*" hidden>
+
+<script>
+(function(){
+"use strict";
+/* ---------- constants ---------- */
+const PNAME={m10:"ខែតុលា",m11:"ខែវិច្ឆិកា",m12:"ខែធ្នូ",q1:"ត្រីមាសទី១",m01:"ខែមករា",m02:"ខែកុម្ភៈ",m03:"ខែមីនា",s1:"ឆមាសទី១",
+ m04:"ខែមេសា",m05:"ខែឧសភា",m06:"ខែមិថុនា",q2:"ត្រីមាសទី២",m07:"ខែកក្កដា",m08:"ខែសីហា",s2:"ឆមាសទី២"};
+const KINDS={
+ primary:{name:"បឋមសិក្សា",letters:true,avgMode:"entered",
+   periods:["m11","m12","m01","m02","m03","s1","m04","m05","m06","m07","m08","s2"],
+   grades:[["A","ល្អណាស់","A"],["B","ល្អ","B"],["C","ល្អបង្គួរ","C"],["D","មធ្យម","D"],["E","ខ្សោយ","E"],["F","គ្មានពិន្ទុ","F"]],
+   scale:[["A","៩.៥ – ១០"],["B","៨ – ៩.៤៩"],["C","៦.៥ – ៧.៩៩"],["D","៥ – ៦.៤៩"],["E","តិចជាង ៥"],["F","០"]],
+   grade:a=>a<=0?"F":a<5?"E":a<6.5?"D":a<8?"C":a<9.5?"B":"A"},
+ kinder:{name:"មត្តេយ្យ",letters:false,avgMode:"all",
+   periods:["m10","m11","q1","m01","m02","s1","m04","m05","q2","m07","m08","s2"],
+   grades:[["G","ល្អ","B"],["P","ល្អបង្គួរ","C"],["M","មធ្យម","D"],["W","ខ្សោយ","E"]],
+   scale:[["G","៨ – ១០"],["P","៦.៥ – ៧.៩៩"],["M","៥ – ៦.៤៩"],["W","តិចជាង ៥"]],
+   grade:a=>a>=8?"G":a>=6.5?"P":a>=5?"M":"W"}
+};
+const ALL_PERIODS=Object.keys(PNAME);
+const KINDER_SUBJECTS=[
+ {key:"k01",name:"រៀនអាន",group:""},{key:"k02",name:"សរសេរតាមអាន",group:""},{key:"k03",name:"គណិតវិទ្យា",group:""},
+ {key:"k04",name:"ពលរដ្ឋ-សីលធម៌",group:""},{key:"k05",name:"គំនូរ",group:""},{key:"k06",name:"តន្ត្រី របាំ ចម្រៀង",group:""},
+ {key:"k07",name:"កីឡា និងហត្ថកម្ម",group:""},{key:"k08",name:"វត្តមាន",group:""},{key:"k09",name:"កិច្ចការផ្ទះ",group:""},{key:"k10",name:"កិច្ចការសាលា",group:""}
+];
+const DEFAULT_SUBJECTS=[
+ {key:"s01",name:"សមត្ថភាពស្តាប់",group:"ភាសាខ្មែរ"},{key:"s02",name:"សមត្ថភាពសរសេរ",group:"ភាសាខ្មែរ"},
+ {key:"s03",name:"សមត្ថភាពអាន",group:"ភាសាខ្មែរ"},{key:"s04",name:"សមត្ថភាពនិយាយ",group:"ភាសាខ្មែរ"},
+ {key:"s05",name:"ចំនួន",group:"គណិតវិទ្យា"},{key:"s06",name:"រង្វាស់រង្វាល់",group:"គណិតវិទ្យា"},
+ {key:"s07",name:"ធរណីមាត្រ",group:"គណិតវិទ្យា"},{key:"s08",name:"ពីជគណិត",group:"គណិតវិទ្យា"},{key:"s09",name:"ស្ថិតិ",group:"គណិតវិទ្យា"},
+ {key:"s10",name:"វិទ្យាសាស្ត្រ",group:""},{key:"s11",name:"សិក្សាសង្គម",group:""},{key:"s12",name:"គេហៈ-អប់រំសិល្បៈ",group:""},
+ {key:"s13",name:"អប់រំកាយ-កីឡា",group:""},{key:"s14",name:"សុខភាព-អនាម័យ",group:""},{key:"s15",name:"គំនូរ-ហត្ថកម្ម",group:""},
+ {key:"s16",name:"អប់រំបំណិនជីវិត",group:""},{key:"s17",name:"ភាសាបរទេស",group:""}
+];
+const KH_DIG="០១២៣៤៥៦៧៨៩";
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const fmt=v=>v==null||isNaN(v)?"":String(Math.round(v*100)/100);
+const fmt2=v=>v==null?"–":v.toFixed(2);
+const pct=(a,b)=>b?Math.round(a/b*1000)/10+"%":"–";
+function parseScore(raw){
+  if(raw==null)return {v:null,ok:true};
+  let s=String(raw).trim().replace(/[០-៩]/g,c=>KH_DIG.indexOf(c)).replace(",",".");
+  if(s==="")return {v:null,ok:true};
+  const n=Number(s);
+  if(!isFinite(n)||n<0||n>10)return {v:null,ok:false};
+  return {v:Math.round(n*100)/100,ok:true};
+}
+function grade(avg,kind){
+  if(avg==null)return null;const K=KINDS[kind]||KINDS.primary;const c=K.grade(avg);
+  const g=K.grades.find(x=>x[0]===c);return [c,g[1],g[2],K.letters];
+}
+const gradeOf=(code,kind)=>{const K=KINDS[kind]||KINDS.primary;const g=K.grades.find(x=>x[0]===code);return g?[g[0],g[1],g[2],K.letters]:null};
+const pill=g=>g?`<span class="gpill ${g[2]}">${g[3]?`<b>${g[0]}</b>`:""}${esc(g[1])}</span>`:"";
+const clone=o=>JSON.parse(JSON.stringify(o??null));
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function arm(btn,label,fn){ // two-step confirm, no dialogs
+  if(btn.dataset.armed){fn();return}
+  const old=btn.textContent;btn.dataset.armed="1";btn.classList.add("armed");btn.textContent=label;
+  setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.classList.remove("armed");btn.textContent=old}},3500);
+}
+
+/* ---------- state ---------- */
+const S={
+  ready:{classes:false,settings:false},
+  classes:[], settings:null, sheet:null, sheetKey:null,
+  sel:{classId:null,period:"m11"}, tab:"scores", rcStudent:null,
+  canWrite:true, canAdmin:true, user:null, needsSetup:false, users:null, backend:"db", status:"", statusErr:false,
+  pending:{}, inflight:{}
+};
+try{const p=JSON.parse(localStorage.getItem("gb-ui")||"{}");if(p.period&&PNAME[p.period])S.sel.period=p.period;if(p.classId)S.sel.classId=p.classId;if(p.tab)S.tab=p.tab}catch(e){}
+function saveUI(){try{localStorage.setItem("gb-ui",JSON.stringify({period:S.sel.period,classId:S.sel.classId,tab:S.tab}))}catch(e){}}
+const curClass=()=>S.classes.find(c=>c.id===S.sel.classId)||null;
+function levels(){
+  const st=S.settings||{};const L=clone(st.levels||{});
+  if(!L.primary)L.primary={name:"បឋមសិក្សា",kind:"primary",subjects:(st.subjects&&st.subjects.length)?clone(st.subjects):clone(DEFAULT_SUBJECTS),avgMode:st.avgMode||"entered"};
+  if(!L.kinder)L.kinder={name:"មត្តេយ្យ",kind:"kinder",subjects:clone(KINDER_SUBJECTS),avgMode:"all"};
+  for(const id in L){const l=L[id];if(!KINDS[l.kind])l.kind="primary";if(!l.subjects||!l.subjects.length)l.subjects=clone(l.kind==="kinder"?KINDER_SUBJECTS:DEFAULT_SUBJECTS);if(!l.avgMode)l.avgMode=KINDS[l.kind].avgMode}
+  return L;
+}
+const levelId=cls=>{const L=levels();const id=cls&&cls.levelId;return id&&L[id]?id:"primary"};
+const levelOf=cls=>levels()[levelId(cls)];
+const subjects=(cls=curClass())=>levelOf(cls).subjects;
+const avgMode=(cls=curClass())=>levelOf(cls).avgMode;
+const kindOf=(cls=curClass())=>levelOf(cls).kind;
+const periodsOf=(cls=curClass())=>KINDS[kindOf(cls)].periods;
+const sheetKey=()=>S.sel.classId?`${S.sel.classId}__${S.sel.period}`:null;
+
+/* ---------- storage backends ---------- */
+let api=null;
+function makeDbApi(db){
+  return {
+    watchClasses(cb,err){return db.collection("classes").onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),err)},
+    saveClass(c){const {id,...rest}=c;return db.doc("classes/"+id).set(rest)},
+    deleteClass(id){return db.doc("classes/"+id).delete()},
+    deleteSheet(key){return db.doc("sheets/"+key).delete()},
+    watchSettings(cb,err){return db.doc("settings/main").onSnapshot(s=>cb(s.exists?s.data():null),err)},
+    saveSettings(o){return db.doc("settings/main").set(o)},
+    async getDoc(p){const s=await db.doc(p).get();return s.exists?s.data():null},
+    setDoc(p,d){return db.doc(p).set(d)},
+    watchSheet(key,cb,err){return db.doc("sheets/"+key).onSnapshot(s=>cb(s.exists?s.data():null),err)},
+    async patchSheet(key,base,patch){
+      const ref=db.doc("sheets/"+key);
+      const snap=await ref.get();
+      if(snap.exists)return ref.update({scores:patch});
+      return ref.set({...base,scores:patch});
+    }
+  };
+}
+function makeLocalApi(){
+  const KEY="gb-local-v1";let st;
+  try{st=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+  st=st||{classes:{},settings:null,sheets:{}};st.docs=st.docs||{};
+  const subs={classes:new Set(),settings:new Set(),sheets:new Map()};
+  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+  const emitC=()=>subs.classes.forEach(f=>f(Object.entries(st.classes).map(([id,d])=>({id,...clone(d)}))));
+  const emitS=()=>subs.settings.forEach(f=>f(clone(st.settings)));
+  const emitSh=k=>(subs.sheets.get(k)||new Set()).forEach(f=>f(clone(st.sheets[k]||null)));
+  const merge=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==="object"&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==="object")merge(a[k],b[k]);else a[k]=clone(b[k])}return a};
+  return {
+    watchClasses(cb){subs.classes.add(cb);setTimeout(emitC);return()=>subs.classes.delete(cb)},
+    async saveClass(c){const {id,...r}=c;st.classes[id]=clone(r);persist();emitC()},
+    async deleteClass(id){delete st.classes[id];persist();emitC()},
+    async deleteSheet(k){delete st.sheets[k];persist();emitSh(k)},
+    watchSettings(cb){subs.settings.add(cb);setTimeout(emitS);return()=>subs.settings.delete(cb)},
+    async saveSettings(o){st.settings=clone(o);persist();emitS()},
+    async getDoc(p){return clone(st.docs[p]||null)},
+    async setDoc(p,d){st.docs[p]=clone(d);persist()},
+    watchSheet(k,cb){if(!subs.sheets.has(k))subs.sheets.set(k,new Set());subs.sheets.get(k).add(cb);setTimeout(()=>cb(clone(st.sheets[k]||null)));return()=>subs.sheets.get(k).delete(cb)},
+    async patchSheet(k,base,patch){if(!st.sheets[k])st.sheets[k]={...base,scores:{}};merge(st.sheets[k].scores,patch);persist();emitSh(k)}
+  };
+}
+
+/* ---------- saving scores (debounced, one write at a time) ---------- */
+let flushTimer=null,writing=Promise.resolve();
+function setStatus(t,err){S.status=t;S.statusErr=!!err;const el=$("#saveStatus");if(el){el.textContent=t;el.className="status"+(err?" err":"")}}
+function queueScore(sid,key,v){
+  (S.pending[sid]=S.pending[sid]||{})[key]=v;
+  setStatus("មិនទាន់រក្សាទុក…");
+  clearTimeout(flushTimer);flushTimer=setTimeout(flush,600);
+}
+function flush(){
+  const k=sheetKey();if(!k)return;
+  const patch=S.pending;if(!Object.keys(patch).length)return;
+  S.pending={};
+  for(const sid in patch){S.inflight[sid]=Object.assign(S.inflight[sid]||{},patch[sid])}
+  setStatus("កំពុងរក្សាទុក…");
+  writing=writing.then(()=>api.patchSheet(k,{classId:S.sel.classId,period:S.sel.period},patch)).then(()=>{
+    for(const sid in patch)for(const key in patch[sid]){if(S.inflight[sid]&&S.inflight[sid][key]===patch[sid][key])delete S.inflight[sid][key]}
+    setStatus("បានរក្សាទុក ✓");
+  }).catch(e=>{
+    // put edits back so nothing typed is lost
+    for(const sid in patch){S.pending[sid]=Object.assign({},patch[sid],S.pending[sid]||{})}
+    S.inflight={};
+    if(e&&e.code==="invalid_argument"){S.canWrite=false;setStatus("អ្នកមិនមានសិទ្ធិកែពិន្ទុទេ (មើលបានតែប៉ុណ្ណោះ)",true);render()}
+    else setStatus("រក្សាទុកមិនបាន — កំពុងព្យាយាមម្ដងទៀត",true),setTimeout(flush,3000);
+  });
+}
+function scoreOf(sid,key){
+  if(S.pending[sid]&&key in S.pending[sid])return S.pending[sid][key];
+  if(S.inflight[sid]&&key in S.inflight[sid])return S.inflight[sid][key];
+  const sc=S.sheet&&S.sheet.scores&&S.sheet.scores[sid];
+  const v=sc?sc[key]:null;return typeof v==="number"?v:null;
+}
+
+/* ---------- computation ---------- */
+function compute(cls){
+  const subs=subjects(cls),mode=avgMode(cls),kind=kindOf(cls),K=KINDS[kind];
+  const rows=(cls?cls.students:[]).map((s,i)=>{
+    const vals=subs.map(sb=>scoreOf(s.id,sb.key));
+    const got=vals.filter(v=>v!=null);
+    const total=got.reduce((a,b)=>a+b,0);
+    const avg=got.length?(mode==="all"?total/subs.length:total/got.length):null;
+    return {s,i,vals,total:got.length?total:null,avg:avg==null?null:Math.round(avg*100)/100,count:got.length};
+  });
+  rows.forEach(r=>{r.rank=r.avg==null?null:1+rows.filter(o=>o.avg!=null&&o.avg>r.avg).length;r.g=grade(r.avg,kind)});
+  const subjAvg=subs.map((_,j)=>{const v=rows.map(r=>r.vals[j]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null});
+  const graded=rows.filter(r=>r.avg!=null);
+  const tot=rows.length,fem=rows.filter(r=>r.s.g==="F").length;
+  const pass=graded.filter(r=>r.avg>=5),fail=graded.filter(r=>r.avg<5);
+  const dist={};K.grades.forEach(([l])=>{const rs=graded.filter(r=>r.g[0]===l);dist[l]={n:rs.length,f:rs.filter(r=>r.s.g==="F").length}});
+  const classAvg=graded.length?graded.reduce((a,r)=>a+r.avg,0)/graded.length:null;
+  return {K,kind,subs,rows,subjAvg,tot,fem,graded,pass,fail,dist,classAvg,
+    passF:pass.filter(r=>r.s.g==="F").length,failF:fail.filter(r=>r.s.g==="F").length};
+}
+
+/* ---------- render ---------- */
+function renderPickers(){
+  const sc=$("#selClass");
+  sc.innerHTML=S.classes.length?S.classes.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}${c.year?" · "+esc(c.year):""}</option>`).join(""):`<option value="">— មិនទាន់មានថ្នាក់ —</option>`;
+  sc.value=S.sel.classId||"";
+  const sp=$("#selPeriod");
+  const ps=periodsOf();if(!ps.includes(S.sel.period)){S.sel.period=ps[0];watchSheet()}
+  sp.innerHTML=ps.map(k=>`<option value="${k}">${PNAME[k]}</option>`).join("");
+  sp.value=S.sel.period;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.tab===S.tab)));
+}
+function banner(){
+  let h="";
+  if(S.backend==="local")h+=window.claude?`<div class="note">ទិន្នន័យកំពុងរក្សាទុកតែក្នុងកម្មវិធីរុករក (browser) នេះប៉ុណ្ណោះ។ សូមចូលគណនី Claude ដើម្បីរក្សាទុកជាប់លាប់ និងចែករំលែកជាមួយគ្រូផ្សេងទៀត។</div>`
+    :`<div class="note">មិនអាចភ្ជាប់ទៅ api.php បានទេ ដូច្នេះទិន្នន័យកំពុងរក្សាទុកតែក្នុងកម្មវិធីរុករក (browser) នេះប៉ុណ្ណោះ។ សូមដាក់ឯកសារលើម៉ាស៊ីនមេដែលមាន PHP តាមការណែនាំក្នុង README។</div>`;
+  if(!S.canWrite)h+=`<div class="note">អ្នកអាចមើលពិន្ទុបាន ប៉ុន្តែមិនអាចកែប្រែបានទេ។</div>`;
+  return h;
+}
+function render(){
+  const m=$("#main");
+  document.body.classList.toggle("locked",S.backend==="server"&&!S.user);
+  renderWho();
+  if(S.backend==="server"&&!S.user){m.innerHTML=viewLogin();bindLogin();return}
+  renderPickers();
+  if(!S.ready.classes||!S.ready.settings){m.innerHTML=`<div class="empty"><h2>កំពុងផ្ទុកទិន្នន័យ…</h2></div>`;return}
+  if(S.tab==="settings"){m.innerHTML=banner()+viewSettings()+viewUsers();bindSettings();bindUsers();return}
+  if(!S.classes.length){m.innerHTML=banner()+viewNoClass();bindNoClass();return}
+  if(S.tab==="scores"){m.innerHTML=banner()+viewScores();bindScores();}
+  else if(S.tab==="students"){m.innerHTML=banner()+viewStudents();bindStudents();}
+  else if(S.tab==="report"){m.innerHTML=banner()+viewReport();bindReport();}
+  else if(S.tab==="honor"){m.innerHTML=banner()+viewHonor();bindHonor();}
+}
+
+function viewNoClass(){
+  if(!S.canAdmin)return `<section class="panel empty"><h2>មិនទាន់មានថ្នាក់នៅឡើយ</h2><p>សូមស្នើឱ្យអ្នកគ្រប់គ្រងបង្កើតថ្នាក់ជាមុនសិន។</p></section>`;
+  return `<section class="panel empty">
+    <h2>មិនទាន់មានថ្នាក់នៅឡើយ</h2>
+    <p>បង្កើតថ្នាក់ដំបូង រួចបញ្ចូលបញ្ជីសិស្ស ឬនាំចូលពីឯកសារ Excel ចាស់របស់សាលា។</p>
+    <form id="fNew" class="row" style="justify-content:center;margin-top:14px">
+      <input class="inp" id="ncName" placeholder="ឈ្មោះថ្នាក់ ឧ. ថ្នាក់ទី៣ក" required ${S.canWrite?"":"disabled"}>
+      <input class="inp" id="ncYear" placeholder="ឆ្នាំសិក្សា ឧ. ២០២៦-២០២៧" ${S.canWrite?"":"disabled"}>
+      <select class="inp" id="ncLevel" ${S.canWrite?"":"disabled"}>${levelOptions("primary")}</select>
+      <button class="btn primary" ${S.canWrite?"":"disabled"}>បង្កើតថ្នាក់</button>
+    </form>
+    <p class="hint" style="margin-top:14px">ឬ <button class="btn sm" id="btnImp0" ${S.canWrite?"":"disabled"}>នាំចូលពី Excel</button></p>
+  </section>`;
+}
+function bindNoClass(){
+  $("#fNew").addEventListener("submit",async e=>{e.preventDefault();await createClass($("#ncName").value.trim(),$("#ncYear").value.trim(),"",$("#ncLevel").value)});
+  $("#btnImp0").onclick=()=>$("#fileImport").click();
+}
+async function createClass(name,year,teacher,levelIdArg){
+  if(!name)return null;
+  const c={id:uid(),name,year:year||"",teacher:teacher||"",levelId:levelIdArg||"primary",students:[],createdAt:Date.now()};
+  try{await api.saveClass(c);S.sel.classId=c.id;saveUI();toast("បានបង្កើតថ្នាក់ "+name);return c}
+  catch(e){toast("បង្កើតថ្នាក់មិនបាន");return null}
+}
+
+function viewScores(){
+  const cls=curClass();const C=compute(cls);
+  const subs=C.subs;
+  const hasGroups=subs.some(s=>s.group);
+  // group header
+  let g1="",g2="";
+  if(hasGroups){
+    let i=0;
+    while(i<subs.length){
+      const g=subs[i].group||"";let j=i;while(j<subs.length&&(subs[j].group||"")===g)j++;
+      g1+=g?`<th class="grp" colspan="${j-i}">${esc(g)}</th>`:`<th class="grp" colspan="${j-i}" rowspan="1"></th>`;
+      i=j;
+    }
+  }
+  const subjTh=subs.map(s=>`<th class="subj" title="${esc(s.name)}">${esc(s.name)}</th>`).join("");
+  const rs=hasGroups?' rowspan="2"':"";
+  const head=hasGroups
+    ?`<tr class="r1"><th class="c-no"${rs}>ល.រ</th><th class="c-name"${rs}>គោត្តនាម និងនាម</th><th class="c-g"${rs}>ភេទ</th>${g1}<th${rs}>សរុប</th><th${rs}>មធ្យមភាគ</th><th${rs}>ចំណាត់<br>ថ្នាក់</th><th${rs}>និទ្ទេស</th></tr><tr class="r2">${subjTh}</tr>`
+    :`<tr><th class="c-no">ល.រ</th><th class="c-name">គោត្តនាម និងនាម</th><th class="c-g">ភេទ</th>${subjTh}<th>សរុប</th><th>មធ្យមភាគ</th><th>ចំណាត់<br>ថ្នាក់</th><th>និទ្ទេស</th></tr>`;
+  const ro=S.canWrite?"":"readonly";
+  const body=C.rows.map((r,ri)=>`<tr data-sid="${esc(r.s.id)}">
+     <td class="c-no num">${ri+1}</td><td class="c-name" title="${esc(r.s.name)}">${esc(r.s.name)}</td><td class="c-g">${r.s.g==="F"?"ស":"ប"}</td>
+     ${r.vals.map((v,j)=>`<td class="cell"><input data-r="${ri}" data-c="${j}" data-k="${esc(subs[j].key)}" inputmode="decimal" autocomplete="off" aria-label="${esc(r.s.name)} ${esc(subs[j].name)}" value="${v==null?"":fmt(v)}" class="${v!=null&&v<5?"low":""}" ${ro}></td>`).join("")}
+     <td class="calc num" data-o="total">${r.total==null?"":fmt(r.total)}</td>
+     <td class="calc avg num" data-o="avg">${fmt2(r.avg)==="–"?"":fmt2(r.avg)}</td>
+     <td class="calc num" data-o="rank">${r.rank?`<span class="rank ${r.rank<=3?"top":""}">${r.rank}</span>`:""}</td>
+     <td class="calc" data-o="g">${pill(r.g)}</td></tr>`).join("");
+  const foot=`<tr><td class="c-no"></td><td class="c-name">មធ្យមភាគមុខវិជ្ជា</td><td></td>${C.subjAvg.map((v,j)=>`<td data-sa="${j}">${v==null?"":v.toFixed(1)}</td>`).join("")}<td></td><td data-o="cavg">${C.classAvg==null?"":C.classAvg.toFixed(2)}</td><td></td><td></td></tr>`;
+  const empty=!C.rows.length?`<div class="empty" style="padding:24px"><p>ថ្នាក់នេះមិនទាន់មានសិស្សទេ។</p><button class="btn primary" id="goStudents">បញ្ចូលបញ្ជីសិស្ស</button></div>`:"";
+  return `
+  <div class="stats" id="statStrip">${statsHTML(C)}</div>
+  <section class="panel" style="padding:14px">
+    <div class="row" style="margin-bottom:10px">
+      <div><h2 style="margin:0">${esc(cls.name)} — ${esc(PNAME[S.sel.period])}</h2>
+      <div class="hint">វាយពិន្ទុ ០–១០ (អាចប្រើ ០.៥)។ ចុច Enter ឬព្រួញ ដើម្បីទៅប្រអប់បន្ទាប់។ រក្សាទុកដោយស្វ័យប្រវត្តិ។</div></div>
+      <span class="spacer"></span>
+      <span id="saveStatus" class="status${S.statusErr?" err":""}">${esc(S.status)}</span>
+      <button class="btn" id="btnImp" ${S.canWrite?"":"disabled"}>នាំចូលពី Excel</button>
+      <button class="btn primary" id="btnExp">ទាញយក Excel</button>
+    </div>
+    ${empty||`<div class="gridwrap"><table class="grid" id="grid"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`}
+  </section>
+  <section class="panel" id="sumPanel">${summaryHTML(C)}</section>`;
+}
+function statsHTML(C){
+  const bar=C.graded.length?C.K.grades.map(([l,k,css])=>C.dist[l].n?`<span class="sw-${css}" style="width:${C.dist[l].n/C.graded.length*100}%" title="${k}: ${C.dist[l].n}"></span>`:"").join(""):"";
+  return `
+   <div class="stat"><div class="k">សិស្សសរុប</div><div class="v num">${C.tot}</div><div class="s">ស្រី ${C.fem} នាក់</div></div>
+   <div class="stat"><div class="k">សិស្សជាប់ (មធ្យមភាគ ≥ ៥)</div><div class="v num">${C.pass.length}</div><div class="s">${pct(C.pass.length,C.graded.length)} · ស្រី ${C.passF}</div></div>
+   <div class="stat"><div class="k">សិស្សធ្លាក់</div><div class="v num" style="color:${C.fail.length?"var(--gE)":"inherit"}">${C.fail.length}</div><div class="s">${pct(C.fail.length,C.graded.length)} · ស្រី ${C.failF}</div></div>
+   <div class="stat"><div class="k">មធ្យមភាគថ្នាក់</div><div class="v num">${C.classAvg==null?"–":C.classAvg.toFixed(2)}</div><div class="s">${C.graded.length} នាក់មានពិន្ទុ</div><div class="dist">${bar}</div></div>`;
+}
+function summaryHTML(C){
+  const n=C.graded.length;
+  const rows=C.K.grades.map(([l])=>`<tr><td>${pill(gradeOf(l,C.kind))}</td><td class="n">${C.dist[l].n}</td><td class="n">${C.dist[l].f}</td><td class="n">${pct(C.dist[l].n,n)}</td></tr>`).join("");
+  return `<h2>សេចក្ដីសរុបលទ្ធផល</h2><p class="sub">គណនាដោយស្វ័យប្រវត្តិ ពីពិន្ទុក្នុងតារាងខាងលើ</p>
+  <div class="sumgrid">
+    <div class="tbl"><table class="plain"><thead><tr><th></th><th style="text-align:right">សរុប</th><th style="text-align:right">ស្រី</th><th style="text-align:right">ភាគរយ</th></tr></thead><tbody>
+      <tr><td>បញ្ឈប់បញ្ជីត្រឹមចំនួន</td><td class="n">${C.tot}</td><td class="n">${C.fem}</td><td class="n"></td></tr>
+      <tr><td>មធ្យមភាគសិស្សជាប់</td><td class="n">${C.pass.length}</td><td class="n">${C.passF}</td><td class="n">${pct(C.pass.length,n)}</td></tr>
+      <tr><td>មធ្យមភាគសិស្សធ្លាក់</td><td class="n">${C.fail.length}</td><td class="n">${C.failF}</td><td class="n">${pct(C.fail.length,n)}</td></tr>
+      <tr><td>គ្មានពិន្ទុ</td><td class="n">${C.tot-n}</td><td class="n">${C.rows.filter(r=>r.avg==null&&r.s.g==="F").length}</td><td class="n"></td></tr>
+    </tbody></table></div>
+    <div class="tbl"><table class="plain"><thead><tr><th>និទ្ទេស</th><th style="text-align:right">សរុប</th><th style="text-align:right">ស្រី</th><th style="text-align:right">ភាគរយ</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+function refreshComputed(){
+  const cls=curClass();if(!cls||S.tab!=="scores")return;
+  const C=compute(cls);const grid=$("#grid");if(!grid)return;
+  C.rows.forEach((r,ri)=>{
+    const tr=grid.tBodies[0].rows[ri];if(!tr)return;
+    tr.querySelector('[data-o="total"]').textContent=r.total==null?"":fmt(r.total);
+    tr.querySelector('[data-o="avg"]').textContent=r.avg==null?"":r.avg.toFixed(2);
+    tr.querySelector('[data-o="rank"]').innerHTML=r.rank?`<span class="rank ${r.rank<=3?"top":""}">${r.rank}</span>`:"";
+    tr.querySelector('[data-o="g"]').innerHTML=pill(r.g);
+    tr.querySelectorAll("input").forEach((inp,j)=>{
+      if(document.activeElement===inp||inp.classList.contains("bad"))return;
+      const v=r.vals[j];const s=v==null?"":fmt(v);if(inp.value!==s)inp.value=s;
+      inp.classList.toggle("low",v!=null&&v<5);
+    });
+  });
+  grid.querySelectorAll("[data-sa]").forEach(td=>{const v=C.subjAvg[+td.dataset.sa];td.textContent=v==null?"":v.toFixed(1)});
+  const ca=grid.querySelector('[data-o="cavg"]');if(ca)ca.textContent=C.classAvg==null?"":C.classAvg.toFixed(2);
+  $("#statStrip").innerHTML=statsHTML(C);$("#sumPanel").innerHTML=summaryHTML(C);
+}
+function bindScores(){
+  const gs=$("#goStudents");if(gs)gs.onclick=()=>{S.tab="students";saveUI();render()};
+  $("#btnImp").onclick=()=>$("#fileImport").click();
+  $("#btnExp").onclick=exportXlsx;
+  const grid=$("#grid");if(!grid)return;
+  const h1=grid.tHead.rows[0];if(h1)grid.style.setProperty("--h1",h1.getBoundingClientRect().height+"px");
+  grid.addEventListener("input",e=>{
+    const inp=e.target;if(!inp.matches("input")||!S.canWrite)return;
+    const sid=inp.closest("tr").dataset.sid,key=inp.dataset.k;
+    const p=parseScore(inp.value);
+    inp.classList.toggle("bad",!p.ok);inp.title=p.ok?"":"ពិន្ទុត្រូវនៅចន្លោះ ០ ដល់ ១០";
+    if(!p.ok)return;
+    inp.classList.toggle("low",p.v!=null&&p.v<5);
+    queueScore(sid,key,p.v);refreshComputed();
+  });
+  grid.addEventListener("keydown",e=>{
+    const inp=e.target;if(!inp.matches("input"))return;
+    let r=+inp.dataset.r,c=+inp.dataset.c;
+    const atStart=inp.selectionStart===0&&inp.selectionEnd===0,atEnd=inp.selectionStart===inp.value.length;
+    if(e.key==="Enter"||e.key==="ArrowDown")r++;
+    else if(e.key==="ArrowUp")r--;
+    else if(e.key==="ArrowRight"&&atEnd)c++;
+    else if(e.key==="ArrowLeft"&&atStart)c--;
+    else return;
+    const t=grid.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+    if(t){e.preventDefault();t.focus();t.select()}
+  });
+  grid.addEventListener("focusin",e=>{if(e.target.matches("input"))e.target.select()});
+}
+
+/* ---------- students ---------- */
+function viewStudents(){
+  const cls=curClass();const dis=S.canWrite?"":"disabled";
+  const list=cls.students.map((s,i)=>`<div class="srow" data-i="${i}">
+     <span class="no num">${i+1}</span>
+     <input class="inp" data-f="name" value="${esc(s.name)}" aria-label="ឈ្មោះសិស្ស ${i+1}" ${dis}>
+     <select class="inp" data-f="g" aria-label="ភេទ" ${dis}><option value="M"${s.g!=="F"?" selected":""}>ប្រុស</option><option value="F"${s.g==="F"?" selected":""}>ស្រី</option></select>
+     <span class="row" style="gap:4px"><button class="btn sm" data-a="up" title="ផ្លាស់ឡើង" ${dis||(i?"":"disabled")}>↑</button><button class="btn sm danger" data-a="del" ${dis}>លុប</button></span>
+  </div>`).join("");
+  const f=cls.students.filter(s=>s.g==="F").length;
+  return `<div class="two">
+   <section class="panel">
+     <h2>បញ្ជីសិស្ស ${esc(cls.name)}</h2>
+     <p class="sub">សរុប ${cls.students.length} នាក់ · ស្រី ${f} នាក់។ ការកែឈ្មោះរក្សាទុកពេលចាកចេញពីប្រអប់។</p>
+     <div class="slist" id="slist">${list||`<p class="hint">មិនទាន់មានសិស្ស។ បន្ថែមនៅខាងស្ដាំ។</p>`}</div>
+   </section>
+   <div style="display:flex;flex-direction:column;gap:20px">
+   <section class="panel">
+     <h2>បន្ថែមសិស្សម្នាក់</h2>
+     <form id="fAdd" class="row" style="margin-top:10px">
+       <input class="inp" id="aName" placeholder="គោត្តនាម និងនាម" style="flex:1" required ${dis}>
+       <select class="inp" id="aG" ${dis}><option value="M">ប្រុស</option><option value="F">ស្រី</option></select>
+       <button class="btn primary" ${dis}>បន្ថែម</button>
+     </form>
+   </section>
+   <section class="panel">
+     <h2>បិទភ្ជាប់បញ្ជីច្រើននាក់</h2>
+     <p class="sub">មួយជួរមួយនាក់។ បន្ថែម «ស» ឬ «ប» នៅចុងជួរ ដើម្បីបញ្ជាក់ភេទ (ឧ. <span class="num">សុខ ស្រីពៅ ស</span>)។ អាចចម្លងពី Excel បាន។</p>
+     <textarea class="inp" id="bulk" placeholder="ណាក់ចាន់ សៀវម៉ី	ស&#10;ចិត្រ វិបុល	ប" ${dis}></textarea>
+     <div class="row" style="margin-top:10px"><button class="btn primary" id="btnBulk" ${dis}>បន្ថែមទាំងអស់</button><span class="spacer"></span><button class="btn" id="btnImp2" ${dis}>នាំចូលពី Excel</button></div>
+   </section>
+   </div></div>`;
+}
+let classWrite=Promise.resolve();
+function saveClass(cls){
+  classWrite=classWrite.then(()=>api.saveClass(cls)).then(()=>setStatus("បានរក្សាទុក ✓")).catch(e=>{toast("រក្សាទុកមិនបាន");if(e&&e.code==="invalid_argument"){S.canWrite=false;render()}});
+  return classWrite;
+}
+function parseLine(line){
+  let t=line.replace(/\t+/g," ").trim().replace(/^\d+[.)\s]+/,"").trim();if(!t)return null;
+  let g="M";const m=t.match(/\s+(ស|ប|ស្រី|ប្រុស|F|M|f|m)$/);
+  if(m){g=/^(ស|ស្រី|F|f)$/.test(m[1])?"F":"M";t=t.slice(0,m.index).trim()}
+  return t?{id:uid(),name:t,g}:null;
+}
+function bindStudents(){
+  const cls=clone(curClass());
+  const sl=$("#slist");
+  sl.addEventListener("change",e=>{
+    const row=e.target.closest(".srow");if(!row)return;const i=+row.dataset.i;
+    const f=e.target.dataset.f;const v=f==="name"?e.target.value.trim():e.target.value;
+    if(f==="name"&&!v){e.target.value=cls.students[i].name;return}
+    cls.students[i][f]=v;saveClass(cls);
+  });
+  sl.addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;const i=+b.closest(".srow").dataset.i;
+    if(b.dataset.a==="up"&&i>0){[cls.students[i-1],cls.students[i]]=[cls.students[i],cls.students[i-1]];saveClass(cls)}
+    if(b.dataset.a==="del")arm(b,"ប្រាកដ?",()=>{cls.students.splice(i,1);saveClass(cls)});
+  });
+  $("#fAdd").addEventListener("submit",e=>{e.preventDefault();const n=$("#aName").value.trim();if(!n)return;
+    cls.students.push({id:uid(),name:n,g:$("#aG").value});saveClass(cls);toast("បានបន្ថែម "+n)});
+  $("#btnBulk").onclick=()=>{const add=$("#bulk").value.split(/\r?\n/).map(parseLine).filter(Boolean);
+    if(!add.length)return;cls.students.push(...add);saveClass(cls);toast("បានបន្ថែមសិស្ស "+add.length+" នាក់")};
+  $("#btnImp2").onclick=()=>$("#fileImport").click();
+}
+
+/* ---------- report card ---------- */
+function viewReport(){
+  const cls=curClass();const C=compute(cls);
+  if(!C.rows.length)return `<section class="panel empty"><p>ថ្នាក់នេះមិនទាន់មានសិស្សទេ។</p></section>`;
+  if(!C.rows.find(r=>r.s.id===S.rcStudent))S.rcStudent=C.rows[0].s.id;
+  const r=C.rows.find(x=>x.s.id===S.rcStudent);
+  const list=C.rows.map(x=>`<button class="rc-item" data-sid="${esc(x.s.id)}" aria-current="${x.s.id===S.rcStudent}"><span class="hint num" style="width:22px">${x.i+1}</span><span class="nm">${esc(x.s.name)}</span>${x.g?`<span class="gpill ${x.g[2]}">${x.g[3]?`<b>${x.g[0]}</b>`:esc(x.g[1])}</span>`:""}</button>`).join("");
+  const subRows=C.subs.map((sb,j)=>`<tr><td>${esc(sb.group?sb.group+" — ":"")}${esc(sb.name)}</td><td class="n">${r.vals[j]==null?"–":fmt(r.vals[j])}</td><td class="n">${C.subjAvg[j]==null?"–":C.subjAvg[j].toFixed(1)}</td></tr>`).join("");
+  return `<div class="rc-layout">
+   <div class="rc-list" id="rcList">${list}</div>
+   <article class="card">
+     <div class="kingdom">ព្រះរាជាណាចក្រកម្ពុជា</div>
+     <div class="motto">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+     <h3>ព្រឹត្តិបត្រពិន្ទុ ${esc(PNAME[S.sel.period])}</h3>
+     <div class="meta">
+       <div><span>ឈ្មោះសិស្ស៖</span> <strong>${esc(r.s.name)}</strong></div>
+       <div><span>ភេទ៖</span> ${r.s.g==="F"?"ស្រី":"ប្រុស"}</div>
+       <div><span>ថ្នាក់៖</span> ${esc(cls.name)}</div>
+       <div><span>ឆ្នាំសិក្សា៖</span> ${esc(cls.year||"–")}</div>
+     </div>
+     <div class="tbl"><table class="plain"><thead><tr><th>មុខវិជ្ជា</th><th style="text-align:right">ពិន្ទុ (/១០)</th><th style="text-align:right">មធ្យមភាគថ្នាក់</th></tr></thead><tbody>${subRows}</tbody></table></div>
+     <div class="res">
+       <div><div class="k">ពិន្ទុសរុប</div><div class="v num">${r.total==null?"–":fmt(r.total)}</div></div>
+       <div><div class="k">មធ្យមភាគ</div><div class="v num">${r.avg==null?"–":r.avg.toFixed(2)}</div></div>
+       <div><div class="k">ចំណាត់ថ្នាក់</div><div class="v num">${r.rank?r.rank+" / "+C.graded.length:"–"}</div></div>
+       <div><div class="k">និទ្ទេស</div><div class="v">${r.g?pill(r.g):"–"}</div></div>
+     </div>
+     <p class="hint" style="margin-top:12px">${r.avg==null?"មិនទាន់មានពិន្ទុ":r.avg>=5?"លទ្ធផល៖ ជាប់":"លទ្ធផល៖ ធ្លាក់"} · មុខវិជ្ជាមានពិន្ទុ ${r.count}/${C.subs.length}</p>
+     <div class="sign"><div><p>បានឃើញ និងឯកភាព<br>នាយកសាលា</p></div><div><p>គ្រូបន្ទុកថ្នាក់</p>${esc(cls.teacher||"")}</div></div>
+   </article></div>`;
+}
+function bindReport(){
+  const l=$("#rcList");if(!l)return;
+  l.addEventListener("click",e=>{const b=e.target.closest(".rc-item");if(!b)return;S.rcStudent=b.dataset.sid;render()});
+}
+
+/* ---------- settings ---------- */
+function levelOptions(sel){const L=levels();return Object.entries(L).map(([id,l])=>`<option value="${esc(id)}"${id===sel?" selected":""}>${esc(l.name)}</option>`).join("")}
+function viewSettings(){
+  const dis=S.canWrite&&S.canAdmin?"":"disabled";
+  const L=levels();if(!S.setLevel||!L[S.setLevel])S.setLevel=levelId(curClass());
+  const lv=L[S.setLevel],K=KINDS[lv.kind];
+  const used=S.classes.filter(c=>levelId(c)===S.setLevel).length;
+  const cls=S.classes.map(c=>`<div class="cls-row" data-id="${esc(c.id)}">
+     <input class="inp" data-f="name" value="${esc(c.name)}" aria-label="ឈ្មោះថ្នាក់" ${dis}>
+     <input class="inp" data-f="teacher" value="${esc(c.teacher||"")}" placeholder="គ្រូបន្ទុកថ្នាក់" aria-label="គ្រូបន្ទុកថ្នាក់" ${dis}>
+     <input class="inp" data-f="year" value="${esc(c.year||"")}" placeholder="ឆ្នាំសិក្សា" aria-label="ឆ្នាំសិក្សា" ${dis}>
+     <select class="inp" data-f="levelId" aria-label="កម្រិតថ្នាក់" ${dis}>${levelOptions(levelId(c))}</select>
+     <span class="row" style="gap:6px"><span class="hint num">${c.students.length} នាក់</span><button class="btn sm danger" data-a="del" ${dis}>លុបថ្នាក់</button></span></div>`).join("");
+  const subs=lv.subjects.map((s,i)=>`<div class="sub-row" data-i="${i}">
+     <span class="hint num">${i+1}</span>
+     <input class="inp" data-f="name" value="${esc(s.name)}" aria-label="ឈ្មោះមុខវិជ្ជា" ${dis}>
+     <input class="inp grpin" data-f="group" value="${esc(s.group||"")}" placeholder="ក្រុម" aria-label="ក្រុមមុខវិជ្ជា" ${dis}>
+     <span class="row" style="gap:4px"><button class="btn sm" data-a="up" ${dis||(i?"":"disabled")}>↑</button><button class="btn sm danger" data-a="del" ${dis}>លុប</button></span></div>`).join("");
+  const lvTabs=Object.entries(L).map(([id,l])=>`<button class="btn sm${id===S.setLevel?" primary":""}" data-lv="${esc(id)}">${esc(l.name)}</button>`).join("");
+  return `<div class="two">
+   <section class="panel">
+     <h2>កម្រិតថ្នាក់ និងមុខវិជ្ជា</h2>
+     <p class="sub">កម្រិតនីមួយៗមានបញ្ជីមុខវិជ្ជា ខែ/ឆមាស និងមាត្រដ្ឋាននិទ្ទេសរៀងៗខ្លួន។ ថ្នាក់នីមួយៗជ្រើសកម្រិតមួយ។</p>
+     <div class="row" id="lvTabs" style="gap:6px;margin-bottom:14px">${lvTabs}</div>
+     <div class="row" style="margin-bottom:6px"><div class="field" style="flex:1"><label for="lvName">ឈ្មោះកម្រិត</label><input class="inp" id="lvName" value="${esc(lv.name)}" ${dis}></div>
+       <span class="hint" style="align-self:flex-end">ប្រភេទ៖ ${esc(K.name)} · ${used} ថ្នាក់</span>
+       ${S.setLevel!=="primary"&&S.setLevel!=="kinder"?`<button class="btn sm danger" id="lvDel" style="align-self:flex-end" ${dis||(used?"disabled":"")}>លុបកម្រិត</button>`:""}</div>
+     <h3 style="margin:14px 0 2px;font-size:.95rem">មុខវិជ្ជា (${lv.subjects.length})</h3>
+     <p class="hint" style="margin:0 0 6px">ពិន្ទុនីមួយៗគិតលើ ១០។ «ក្រុម» ជាចំណងជើងរួមក្នុងតារាង (ឧ. ភាសាខ្មែរ គណិតវិទ្យា)។</p>
+     <div id="subList">${subs}</div>
+     <form id="fSub" class="row" style="margin-top:12px"><input class="inp" id="nsName" placeholder="មុខវិជ្ជាថ្មី" style="flex:1" required ${dis}><input class="inp" id="nsGroup" placeholder="ក្រុម (បើមាន)" style="width:140px" ${dis}><button class="btn primary" ${dis}>បន្ថែម</button></form>
+     <h3 style="margin:18px 0 2px;font-size:.95rem">របៀបគិតមធ្យមភាគ</h3>
+     <label class="row" style="margin-top:6px;align-items:flex-start;flex-wrap:nowrap"><input type="radio" name="am" value="all" ${lv.avgMode==="all"?"checked":""} ${dis}><span>ពិន្ទុសរុប ÷ មុខវិជ្ជាទាំងអស់ <span class="hint">(មុខវិជ្ជាខ្វះពិន្ទុ គិតជា ០)</span></span></label>
+     <label class="row" style="margin-top:6px;align-items:flex-start;flex-wrap:nowrap"><input type="radio" name="am" value="entered" ${lv.avgMode==="entered"?"checked":""} ${dis}><span>ពិន្ទុសរុប ÷ ចំនួនមុខវិជ្ជាដែលមានពិន្ទុ</span></label>
+     <h3 style="margin:18px 0 2px;font-size:.95rem">មាត្រដ្ឋាននិទ្ទេស</h3>
+     <table class="plain" style="margin-top:4px"><tbody>${K.scale.map(([c,r])=>`<tr><td>${pill(gradeOf(c,lv.kind))}</td><td class="n">${r}</td></tr>`).join("")}</tbody></table>
+     <p class="hint">ខែ/ឆមាស៖ ${K.periods.map(p=>esc(PNAME[p])).join(" · ")}</p>
+     <form id="fLv" class="row" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px"><input class="inp" id="nlName" placeholder="កម្រិតថ្មី ឧ. ថ្នាក់ទី១–២" style="flex:1" required ${dis}>
+       <select class="inp" id="nlKind" ${dis}><option value="primary">ប្រភេទបឋមសិក្សា</option><option value="kinder">ប្រភេទមត្តេយ្យ</option></select><button class="btn" ${dis}>បន្ថែមកម្រិត</button></form>
+   </section>
+   <section class="panel">
+     <h2>ថ្នាក់រៀន</h2>
+     <p class="sub">ការលុបថ្នាក់ នឹងលុបបញ្ជីសិស្ស និងពិន្ទុទាំងអស់របស់ថ្នាក់នោះ។</p>
+     <div id="clsList">${cls||`<p class="hint">មិនទាន់មានថ្នាក់។</p>`}</div>
+     <form id="fCls" class="row" style="margin-top:12px"><input class="inp" id="ncName2" placeholder="ឈ្មោះថ្នាក់ ឧ. ថ្នាក់ទី៤ខ" style="flex:1" required ${dis}><input class="inp" id="ncYear2" placeholder="ឆ្នាំសិក្សា" style="width:130px" ${dis}>
+       <select class="inp" id="ncLevel2" ${dis}>${levelOptions(S.setLevel)}</select><button class="btn primary" ${dis}>បង្កើតថ្នាក់</button></form>
+   </section></div>`;
+}
+let setWrite=Promise.resolve();
+function saveSettings(o){S.settings=o;setWrite=setWrite.then(()=>api.saveSettings(o)).catch(()=>toast("រក្សាទុកមិនបាន"));return setWrite}
+function saveLevels(L){const o=clone(S.settings||{});delete o.subjects;delete o.avgMode;o.levels=L;return saveSettings(o)}
+function bindSettings(){
+  const id=S.setLevel;
+  const edit=fn=>{const L=levels();fn(L[id],L);saveLevels(L)};
+  $("#lvTabs").addEventListener("click",e=>{const b=e.target.closest("[data-lv]");if(!b)return;S.setLevel=b.dataset.lv;render()});
+  $("#lvName").addEventListener("change",e=>{const v=e.target.value.trim();if(!v)return;edit(l=>l.name=v);render()});
+  const del=$("#lvDel");if(del)del.onclick=()=>arm(del,"ប្រាកដ?",()=>{const L=levels();delete L[id];S.setLevel="primary";saveLevels(L);render()});
+  $("#subList").addEventListener("change",e=>{const row=e.target.closest(".sub-row");if(!row)return;const i=+row.dataset.i;
+    const v=e.target.value.trim();if(e.target.dataset.f==="name"&&!v){e.target.value=levels()[id].subjects[i].name;return}
+    edit(l=>l.subjects[i][e.target.dataset.f]=v)});
+  $("#subList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const i=+b.closest(".sub-row").dataset.i;
+    if(b.dataset.a==="up"&&i>0){edit(l=>{[l.subjects[i-1],l.subjects[i]]=[l.subjects[i],l.subjects[i-1]]});render()}
+    if(b.dataset.a==="del")arm(b,"ប្រាកដ?",()=>{edit(l=>l.subjects.splice(i,1));render()})});
+  $("#fSub").addEventListener("submit",e=>{e.preventDefault();edit(l=>l.subjects.push({key:"x"+uid(),name:$("#nsName").value.trim(),group:$("#nsGroup").value.trim()}));render()});
+  document.querySelectorAll('input[name="am"]').forEach(r=>r.addEventListener("change",()=>edit(l=>l.avgMode=r.value)));
+  $("#fLv").addEventListener("submit",e=>{e.preventDefault();const kind=$("#nlKind").value;const nid="lv"+uid();
+    const L=levels();const src=kind==="kinder"?L.kinder:L.primary;
+    L[nid]={name:$("#nlName").value.trim(),kind,subjects:clone(src.subjects),avgMode:src.avgMode};S.setLevel=nid;saveLevels(L);render()});
+  const cl=$("#clsList");
+  cl.addEventListener("change",e=>{const row=e.target.closest(".cls-row");if(!row)return;const c=clone(S.classes.find(x=>x.id===row.dataset.id));
+    const v=e.target.value.trim();if(e.target.dataset.f==="name"&&!v){e.target.value=c.name;return}c[e.target.dataset.f]=v;saveClass(c);
+    if(e.target.dataset.f==="levelId"){S.classes=S.classes.map(x=>x.id===c.id?c:x);renderPickers()}});
+  cl.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const cid=b.closest(".cls-row").dataset.id;
+    arm(b,"ចុចម្ដងទៀតដើម្បីលុប",async()=>{try{await api.deleteClass(cid);for(const p of ALL_PERIODS)api.deleteSheet(cid+"__"+p).catch(()=>{});toast("បានលុបថ្នាក់")}catch(err){toast("លុបមិនបាន")}})});
+  $("#fCls").addEventListener("submit",async e=>{e.preventDefault();await createClass($("#ncName2").value.trim(),$("#ncYear2").value.trim(),"",$("#ncLevel2").value)});
+}
+
+/* ---------- file download (Claude viewer or ordinary browser) ---------- */
+async function saveFile(filename,data){
+  if(window.claude){
+    const dl=await window.claude.use("downloads").catch(()=>null);
+    if(!dl){toast("ការទាញយកមិនអាចប្រើបាននៅទីនេះទេ");return false}
+    try{await dl.save({filename,data});return true}catch(e){if(e&&e.code!=="declined")toast("ទាញយកមិនបាន");return false}
+  }
+  const blob=data instanceof Blob?data:new Blob([data]);const u=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),5000);return true;
+}
+
+/* ---------- honor roll ---------- */
+const KH_MONTHS=["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+const toKh=s=>String(s).replace(/[0-9]/g,d=>KH_DIG[d]);
+S.photos={};S.photoLoading=new Set();S.honor={};S.honorLoading=new Set();
+function todayKh(){const d=new Date();return `ថ្ងៃទី${toKh(d.getDate())} ខែ${KH_MONTHS[d.getMonth()]} ឆ្នាំ${toKh(d.getFullYear())}`}
+const periodTitle=p=>PNAME[p];
+function school(){const s=S.settings||{};return {kh:s.schoolKh||"",en:s.schoolEn||"",pt:s.principalTitle||"នាយកសាលា",pn:s.principalName||""}}
+function honorMeta(){const k=sheetKey();return Object.assign({count:5,lunar:"",solar:""},S.honor[k]||{})}
+function ensureHonorData(ids){
+  const k=sheetKey();
+  if(k&&!(k in S.honor)&&!S.honorLoading.has(k)){S.honorLoading.add(k);
+    api.getDoc("honor/"+k).then(d=>{S.honor[k]=d||{};}).catch(()=>{S.honor[k]={}}).finally(()=>{S.honorLoading.delete(k);if(S.tab==="honor")render()})}
+  ["logo",...ids].forEach(id=>{
+    if(id in S.photos||S.photoLoading.has(id))return;S.photoLoading.add(id);
+    api.getDoc("photos/"+id).then(d=>{S.photos[id]=d&&d.data||null}).catch(()=>{S.photos[id]=null}).finally(()=>{S.photoLoading.delete(id);if(S.tab==="honor"&&!S.photoLoading.size)refreshHonor()})
+  });
+}
+function honorList(C,n){
+  return C.rows.filter(r=>r.rank&&r.rank<=n).sort((a,b)=>a.rank-b.rank||a.i-b.i).slice(0,n+2);
+}
+function honorSheetHTML(cls,C,meta,edit){
+  const sc=school(),top=honorList(C,meta.count);
+  const rows=[];if(top.length)rows.push(top.slice(0,1));for(let i=1;i<top.length;i+=2)rows.push(top.slice(i,i+2));
+  const big=rows.length<=3;
+  const vars=big?"--sw:300px;--pw:150px;--mw:50px":rows.length<=4?"--sw:300px;--pw:118px;--mw:42px":"--sw:300px;--pw:92px;--mw:36px";
+  const slot=r=>{const ph=S.photos[r.s.id];
+    return `<div class="hs-slot"><div class="hs-photo${edit?" edit":""}" data-photo="${esc(r.s.id)}" title="${edit?"ចុចដើម្បីដាក់រូបថត":""}">${ph?`<img src="${ph}" alt="">`:(edit?"ចុចដើម្បី<br>ដាក់រូបថត":"")}<div class="hs-medal">${toKh(r.rank)}</div></div>
+      <div class="hs-name">${esc(r.s.name)}</div><div class="hs-score">មធ្យមភាគ ${toKh(r.avg.toFixed(2))} · និទ្ទេស ${r.g[3]?r.g[0]:esc(r.g[1])}</div></div>`};
+  const logo=S.photos.logo;
+  const dots='<span class="hs-dots">..........................</span>';
+  return `<div class="hs" id="hs" style="${vars}"><div class="hs-frame">
+    <div class="hs-top">
+      <div class="hs-school"><div class="hs-logo${logo?" has":""}" data-photo="logo" ${edit?'style="cursor:pointer" title="ចុចដើម្បីដាក់ឡូហ្គោ"':""}>${logo?`<img src="${logo}" alt="">`:(edit?"ឡូហ្គោ":"")}</div>
+        <div class="hs-skh">${esc(sc.kh)||dots}</div><div class="hs-sen">${esc(sc.en)}</div></div>
+      <div class="hs-kingdom">ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ<div class="orn">❖ ❖ ❖</div></div>
+    </div>
+    <h1 class="hs-title">តារាងកិត្តិយសប្រចាំ${esc(periodTitle(S.sel.period))}</h1>
+    <div class="hs-sub">${esc(cls.name)}${cls.year?" ឆ្នាំសិក្សា"+esc(toKh(cls.year)):""}</div>
+    <div class="hs-podium">${top.length?rows.map(rw=>`<div class="hs-row${rw.length===1?" one":""}">${rw.map(slot).join("")}</div>`).join(""):`<div class="hs-empty">មិនទាន់មានពិន្ទុសម្រាប់${esc(PNAME[S.sel.period])}ទេ</div>`}</div>
+    <div class="hs-foot">
+      <div class="col"><div>បានឃើញ និងឯកភាព</div><div class="ttl">${esc(sc.pt)}</div><div class="sp"></div><div class="nm">${esc(sc.pn)}</div></div>
+      <div class="col"><div>${esc(meta.lunar)||"ថ្ងៃ......... ......កើត/រោច ខែ......... ឆ្នាំ......... ព.ស.........."}</div>
+        <div>ត្រូវនឹង${esc(meta.solar||todayKh())}</div><div class="ttl">គ្រូបន្ទុកថ្នាក់</div><div class="sp"></div><div class="nm">${esc(cls.teacher||"")}</div></div>
+    </div>
+  </div></div>`;
+}
+function viewHonor(){
+  const cls=curClass();const C=compute(cls);const meta=honorMeta();const sc=school();
+  ensureHonorData(honorList(C,meta.count).map(r=>r.s.id));
+  const dis=S.canWrite?"":"disabled";
+  return `<div class="hon-layout">
+   <section class="panel hon-form" id="honForm">
+     <div><h2>តារាងកិត្តិយស</h2><p class="sub" style="margin:0">ជ្រើសសិស្សពូកែដោយស្វ័យប្រវត្តិ តាមចំណាត់ថ្នាក់${esc(PNAME[S.sel.period])}។ ចុចលើប្រអប់រូបថត ដើម្បីដាក់រូបសិស្ស។</p></div>
+     <div class="field"><label for="hCount">ចំនួនសិស្ស</label><select class="inp" id="hCount" ${dis}>${[3,5,7,10].map(n=>`<option value="${n}"${n==meta.count?" selected":""}>${toKh(n)} នាក់ដំបូង</option>`).join("")}</select></div>
+     <div class="field"><label for="hLunar">ថ្ងៃខែតាមចន្ទគតិ</label><input class="inp" id="hLunar" value="${esc(meta.lunar)}" placeholder="ថ្ងៃអង្គារ ១៣កើត ខែចេត្រ ឆ្នាំម្សាញ់ សប្តស័ក ព.ស.២៥៦៩" ${dis}></div>
+     <div class="field"><label for="hSolar">ថ្ងៃខែតាមសុរិយគតិ</label><input class="inp" id="hSolar" value="${esc(meta.solar)}" placeholder="${esc(todayKh())}" ${dis}></div>
+     <div class="field"><label for="hTeacher">គ្រូបន្ទុកថ្នាក់</label><input class="inp" id="hTeacher" value="${esc(cls.teacher||"")}" ${dis}></div>
+     <h3>ព័ត៌មានសាលា (ប្រើគ្រប់ថ្នាក់)</h3>
+     <div class="field"><label for="hSkh">ឈ្មោះសាលា (ខ្មែរ)</label><input class="inp" id="hSkh" data-admin="1" value="${esc(sc.kh)}" ${dis}></div>
+     <div class="field"><label for="hSen">ឈ្មោះសាលា (អង់គ្លេស)</label><input class="inp" id="hSen" data-admin="1" value="${esc(sc.en)}" ${dis}></div>
+     <div class="field"><label for="hPt">តួនាទីអ្នកចុះហត្ថលេខា</label><input class="inp" id="hPt" data-admin="1" value="${esc(sc.pt)}" ${dis}></div>
+     <div class="field"><label for="hPn">ឈ្មោះនាយក</label><input class="inp" id="hPn" data-admin="1" value="${esc(sc.pn)}" ${dis}></div>
+     <div class="row"><button class="btn primary" id="hPng">ទាញយករូបភាព (PNG)</button><button class="btn" id="hPdf">ទាញយក PDF</button></div>
+     <p class="hint" style="margin:0">រូបថតត្រូវបានបង្រួមទំហំមុនរក្សាទុក។ ប្រើ PDF សម្រាប់បោះពុម្ពលើក្រដាស A4។</p>
+   </section>
+   <div class="hs-wrap" id="hsWrap">${honorSheetHTML(cls,C,meta,S.canWrite)}</div>
+  </div>`;
+}
+function fitHonor(){const w=$("#hsWrap"),h=$("#hs");if(!w||!h)return;const s=w.clientWidth/794;h.style.transform=`scale(${s})`;w.style.height=1123*s+"px"}
+window.addEventListener("resize",fitHonor);
+let honorWrite=Promise.resolve();
+function bindHonor(){
+  fitHonor();
+  if(!S.canAdmin)document.querySelectorAll('#honForm [data-admin]').forEach(i=>i.disabled=true);
+  const cls=curClass(),k=sheetKey();
+  const saveMeta=()=>{const m={count:+$("#hCount").value,lunar:$("#hLunar").value.trim(),solar:$("#hSolar").value.trim()};
+    S.honor[k]=m;honorWrite=honorWrite.then(()=>api.setDoc("honor/"+k,m)).catch(()=>toast("រក្សាទុកមិនបាន"));refreshHonor()};
+  ["hCount","hLunar","hSolar"].forEach(id=>$("#"+id).addEventListener("change",saveMeta));
+  $("#hTeacher").addEventListener("change",e=>{const c=clone(cls);c.teacher=e.target.value.trim();saveClass(c);S.classes=S.classes.map(x=>x.id===c.id?c:x);refreshHonor()});
+  const schoolMap={hSkh:"schoolKh",hSen:"schoolEn",hPt:"principalTitle",hPn:"principalName"};
+  Object.entries(schoolMap).forEach(([id,f])=>$("#"+id).addEventListener("change",e=>{const o=clone(S.settings||{});o[f]=e.target.value.trim();saveSettings(o);refreshHonor()}));
+  $("#hsWrap").addEventListener("click",e=>{if(!S.canWrite)return;const p=e.target.closest("[data-photo]");if(!p)return;const fi=$("#filePhoto");fi.dataset.target=p.dataset.photo;fi.click()});
+  $("#hPng").onclick=()=>exportHonor("png");$("#hPdf").onclick=()=>exportHonor("pdf");
+}
+function refreshHonor(){const w=$("#hsWrap");if(!w)return;const cls=curClass();const C=compute(cls),m=honorMeta();ensureHonorData(honorList(C,m.count).map(r=>r.s.id));w.innerHTML=honorSheetHTML(cls,C,m,S.canWrite);fitHonor()}
+async function shrinkImage(file,W,H,cover){
+  const url=URL.createObjectURL(file);
+  try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);
+    const r=cover?Math.max(W/img.width,H/img.height):Math.min(W/img.width,H/img.height);
+    const w=img.width*r,h=img.height*r;x.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+    return c.toDataURL("image/jpeg",.82);
+  }finally{URL.revokeObjectURL(url)}
+}
+async function uploadPhoto(file,target){
+  let data;try{data=target==="logo"?await shrinkImage(file,320,320,false):await shrinkImage(file,360,450,true)}catch(e){toast("អានរូបភាពមិនបាន");return}
+  S.photos[target]=data;refreshHonor();
+  try{await api.setDoc("photos/"+target,{data,at:Date.now()});toast("បានរក្សាទុករូបថត")}catch(e){toast(e&&e.code==="quota_exceeded"?"ទំហំផ្ទុកពេញ សូមលុបរូបចាស់ៗ":"រក្សាទុករូបថតមិនបាន")}
+}
+let h2cP=null,pdfP=null;
+const loadScript=(src)=>new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+async function exportHonor(kind){
+  const cls=curClass();
+  try{
+    h2cP=h2cP||loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");await h2cP;
+    if(kind==="pdf"){pdfP=pdfP||loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");await pdfP}
+  }catch(e){h2cP=pdfP=null;toast("មិនអាចផ្ទុកកម្មវិធីបង្កើតឯកសារបានទេ");return}
+  toast("កំពុងរៀបចំឯកសារ…");
+  const holder=document.createElement("div");holder.style.cssText="position:fixed;left:-12000px;top:0;width:794px;height:1123px";
+  holder.innerHTML=honorSheetHTML(cls,compute(cls),honorMeta(),false);document.body.appendChild(holder);
+  const el=holder.firstElementChild;el.style.position="relative";el.style.transform="none";
+  let canvas;
+  try{await document.fonts.ready;canvas=await window.html2canvas(el,{scale:2.5,backgroundColor:"#ffffff",logging:false})}
+  catch(e){toast("បង្កើតរូបភាពមិនបាន");holder.remove();return}
+  holder.remove();
+  const base=`តារាងកិត្តិយស-${cls.name}-${periodTitle(S.sel.period)}`.replace(/[\\/:*?"<>|]/g,"-");
+  let data,fname;
+  if(kind==="pdf"){const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"});pdf.addImage(canvas.toDataURL("image/jpeg",.92),"JPEG",0,0,210,297);data=pdf.output("blob");fname=base+".pdf"}
+  else{data=await new Promise(r=>canvas.toBlob(r,"image/png"));fname=base+".png"}
+  if(await saveFile(fname,data))toast("បានទាញយក "+fname);
+}
+
+/* ---------- SheetJS (loaded on demand) ---------- */
+let xlsxP=null;
+function loadXLSX(){
+  if(window.XLSX)return Promise.resolve(window.XLSX);
+  return xlsxP=xlsxP||new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>res(window.XLSX);s.onerror=()=>{xlsxP=null;rej(new Error("load"))};document.head.appendChild(s)});
+}
+async function exportXlsx(){
+  const cls=curClass();const C=compute(cls);
+  let X;try{X=await loadXLSX()}catch(e){toast("មិនអាចផ្ទុកកម្មវិធី Excel បានទេ");return}
+  const head=["ល.រ","គោត្តនាម និងនាម","ភេទ",...C.subs.map(s=>s.name),"ពិន្ទុសរុប","មធ្យមភាគ","ចំណាត់ថ្នាក់","និទ្ទេស",""];
+  const aoa=[["តារាងពិន្ទុ "+cls.name+" — "+PNAME[S.sel.period]+(cls.year?" ឆ្នាំសិក្សា "+cls.year:"")],[],head];
+  C.rows.forEach((r,i)=>aoa.push([i+1,r.s.name,r.s.g==="F"?"ស":"ប",...r.vals.map(v=>v==null?"":v),r.total??"",r.avg??"",r.rank??"",r.g&&r.g[3]?r.g[0]:"",r.g?r.g[1]:""]));
+  aoa.push(["","មធ្យមភាគមុខវិជ្ជា","",...C.subjAvg.map(v=>v==null?"":Math.round(v*100)/100),"",C.classAvg==null?"":Math.round(C.classAvg*100)/100]);
+  aoa.push([]);
+  const n=C.graded.length,P=a=>n?Math.round(a/n*1000)/10+"%":"";
+  aoa.push(["","បញ្ឈប់បញ្ជីត្រឹមចំនួន",C.tot,"ស្រី",C.fem]);
+  aoa.push(["","មធ្យមភាគសិស្សជាប់",C.pass.length,"ស្រី",C.passF,"ភាគរយ",P(C.pass.length)]);
+  aoa.push(["","មធ្យមភាគសិស្សធ្លាក់",C.fail.length,"ស្រី",C.failF,"ភាគរយ",P(C.fail.length)]);
+  C.K.grades.forEach(([l,k])=>aoa.push(["","និទ្ទេស "+(C.K.letters?l+" ("+k+")":k),C.dist[l].n,"ស្រី",C.dist[l].f,"ភាគរយ",P(C.dist[l].n)]));
+  const ws=X.utils.aoa_to_sheet(aoa);
+  ws["!cols"]=[{wch:5},{wch:24},{wch:5},...C.subs.map(()=>({wch:7})),{wch:9},{wch:9},{wch:8},{wch:6},{wch:10}];
+  ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:head.length-1}}];
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"ពិន្ទុ");
+  const buf=X.write(wb,{type:"array",bookType:"xlsx"});
+  const fname=`ពិន្ទុ-${cls.name}-${PNAME[S.sel.period]}.xlsx`.replace(/[\\/:*?"<>|]/g,"-");
+  if(await saveFile(fname,new Uint8Array(buf)))toast("បានទាញយក "+fname);
+}
+async function importXlsx(file){
+  if(!S.canWrite)return;
+  let X;try{X=await loadXLSX()}catch(e){toast("មិនអាចផ្ទុកកម្មវិធី Excel បានទេ");return}
+  const clean=v=>String(v??"").replace(/[\u200b\u200c\u200d\ufeff]/g,"").replace(/\s+/g," ").trim();
+  const norm=v=>clean(v).replace(/\s*(១០|10)$/,"").replace(/[\s,\-–.]/g,"").replace("អបរំ","អប់រំ");
+  const pnorm=v=>clean(v).replace(/ត្រីមសា/g,"ត្រីមាស").replace(/ប្រឡង|ខែ|ទី|\s/g,"");
+  const parsed=[];
+  try{
+    const wb=X.read(await file.arrayBuffer(),{type:"array"});
+    for(const sn of wb.SheetNames){
+      const rows=X.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:null});
+      const hi=rows.findIndex(row=>row&&row.some(c=>typeof c==="string"&&/គោត្តនាម|ឈ្មោះសិស្ស/.test(c)));
+      if(hi<0)continue;
+      const H0=rows[hi];const nameCol=H0.findIndex(c=>typeof c==="string"&&/គោត្តនាម|ឈ្មោះសិស្ស/.test(c));
+      const gCol=H0.findIndex(c=>clean(c)==="ភេទ");
+      const sub=rows[hi+1]||[];
+      const useSub=!clean(sub[nameCol])&&sub.some(c=>typeof c==="string"&&clean(c));
+      const H=H0.map((c,k)=>useSub&&clean(sub[k])?clean(sub[k]):clean(c));
+      const width=Math.max(H0.length,sub.length);
+      let endCol=-1;for(let k=nameCol+1;k<width;k++){if(/សរុប|មធ្យមភាគ/.test(H[k]||"")){endCol=k;break}}
+      const cols=[];for(let k=Math.max(nameCol,gCol)+1;k<(endCol>0?endCol:width);k++){const h=H[k]||"";if(h&&h!=="មុខវិជ្ជា")cols.push({c:k,label:h.replace(/\s*(១០|10)$/,"").replace(/,/g," ").trim()})}
+      const studs=[];
+      for(let r=hi+(useSub?2:1);r<rows.length;r++){
+        const row=rows[r]||[];const nm=clean(row[nameCol]);
+        const lead=clean(row[0]);
+        if(/សិស្សសរុប|បញ្ឈប់/.test(lead))break;
+        if(!nm)continue;
+        if(/[:៖ៈ]|បញ្ឈប់|មធ្យមភាគ|សរុប/.test(nm))break;
+        const gv=gCol>=0?clean(row[gCol]):"";
+        const sc={};cols.forEach(({c,label})=>{const p=parseScore(row[c]);if(p.ok&&p.v!=null)sc[label]=p.v});
+        studs.push({name:nm.replace(/\.\s*/g," ").replace(/\s+/g," ").trim(),g:/^ស/.test(gv)?"F":"M",sc});
+      }
+      const meta={};
+      for(let r=0;r<hi;r++){const row=rows[r]||[];row.forEach((c,k)=>{const t=clean(c).replace(/[៖:ៈ]$/,"").trim();
+        const key=t==="ថ្នាក់"?"cls":t==="ឆ្នាំសិក្សា"?"year":t==="គ្រូបន្ទុកថ្នាក់"?"teacher":null;
+        if(key&&!meta[key]){for(let q=k+1;q<row.length;q++){const v=clean(row[q]);if(v){meta[key]=v;break}}}})}
+      if(studs.length)parsed.push({sheet:sn,cols,studs,meta});
+    }
+  }catch(e){toast("អានឯកសារមិនបាន");return}
+  if(!parsed.length){toast("រកមិនឃើញឈ្មោះសិស្សក្នុងឯកសារ");return}
+  // keep only sheets that hold scores (a blank template repeats the names on every month)
+  const withScores=parsed.filter(p=>p.studs.some(st=>Object.keys(st.sc).length));
+  if(withScores.length)parsed.splice(0,parsed.length,...withScores);else parsed.splice(1);
+  const meta=Object.assign({},...parsed.map(p=>p.meta).reverse());
+  // which level do these subjects belong to?
+  let L=levels();
+  const labels=parsed[0].cols.map(x=>norm(x.label));
+  const fit=id=>L[id].subjects.filter(s=>labels.includes(norm(s.name))).length;
+  const best=Object.keys(L).sort((a,b)=>fit(b)-fit(a))[0];
+  const idOf=n=>String(n).replace(/\s+/g,"");
+  let cls=null;
+  if(meta.cls){
+    cls=S.classes.find(c=>idOf(c.name)===idOf(meta.cls))||null;
+    if(!cls){cls=await createClass(meta.cls,meta.year||"",meta.teacher||"",best);if(!cls)return}
+  }else{
+    cls=curClass();
+    if(!cls||(levelId(cls)!==best&&fit(levelId(cls))<fit(best))){cls=await createClass(L[best].name+" (នាំចូល)","","",best);if(!cls)return}
+  }
+  cls=clone(cls);
+  if(levelId(cls)!==best&&fit(levelId(cls))<fit(best))cls.levelId=best;
+  if(meta.year&&!cls.year)cls.year=meta.year;
+  if(meta.teacher&&!cls.teacher)cls.teacher=meta.teacher;
+  const lid=levelId(cls);
+  // map columns to subject keys, adding any new subjects to this level
+  const lv=L[lid];const keyFor={};const added=[];
+  parsed.forEach(p=>p.cols.forEach(({label})=>{
+    if(keyFor[label])return;
+    let sb=lv.subjects.find(s=>norm(s.name)===norm(label));
+    if(!sb){sb={key:"x"+uid(),name:label,group:""};lv.subjects.push(sb);added.push(label)}
+    keyFor[label]=sb.key;
+  }));
+  if(added.length){await saveLevels(L)}
+  // map sheets to periods
+  const plist=periodsOf(cls);
+  const plan=[];const skipped=[];
+  parsed.forEach(p=>{
+    let per=plist.find(k=>pnorm(PNAME[k])===pnorm(p.sheet));
+    if(!per&&parsed.length===1)per=plist.includes(S.sel.period)?S.sel.period:plist[0];
+    if(per)plan.push([per,p]);else skipped.push(p.sheet);
+  });
+  if(!plan.length){toast("ឈ្មោះសន្លឹកមិនត្រូវនឹងខែណាមួយទេ");return}
+  const patches={};
+  plan.forEach(([per,p])=>{
+    const patch=patches[per]=patches[per]||{};
+    p.studs.forEach(st=>{
+      let ex=cls.students.find(s=>idOf(s.name)===idOf(st.name));
+      if(!ex){ex={id:uid(),name:st.name,g:st.g};cls.students.push(ex)}
+      const sc={};for(const lab in st.sc)sc[keyFor[lab]]=st.sc[lab];
+      if(Object.keys(sc).length)patch[ex.id]=Object.assign(patch[ex.id]||{},sc);
+    });
+  });
+  await saveClass(cls);
+  S.classes=S.classes.some(c=>c.id===cls.id)?S.classes.map(c=>c.id===cls.id?cls:c):[...S.classes,cls];
+  setStatus("កំពុងរក្សាទុក…");
+  try{for(const per in patches){if(Object.keys(patches[per]).length)await api.patchSheet(`${cls.id}__${per}`,{classId:cls.id,period:per},patches[per])}
+    setStatus("បានរក្សាទុក ✓")}
+  catch(e){setStatus("រក្សាទុកពិន្ទុមិនបាន",true)}
+  S.sel.classId=cls.id;S.sel.period=plan[plan.length-1][0];S.tab="scores";saveUI();
+  S.sheetKey=null;watchSheet();render();
+  const names=plan.map(([per])=>PNAME[per]).join(", ");
+  toast(`បាននាំចូល ${cls.name} · សិស្ស ${cls.students.length} នាក់ · ${names}`+(added.length?` · មុខវិជ្ជាថ្មី ${added.length}`:"")+(skipped.length?` · រំលង ${skipped.join(", ")}`:""));
+}
+
+/* ---------- self-hosted server (api.php) ---------- */
+const pollers=new Set();
+function kick(){pollers.forEach(f=>f())}
+async function req(a,body){
+  const opt={method:body?"POST":"GET",credentials:"same-origin",headers:{"Accept":"application/json"}};
+  if(body){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body)}
+  let r;try{r=await fetch("api.php?a="+a,opt)}catch(e){throw {code:"unavailable",message:"network"}}
+  let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401&&a!=="login"){if(S.user)location.reload();throw {code:"unauthenticated"}}
+  if(r.status===403||r.status===401)throw {code:"invalid_argument",message:(j&&j.error)||"forbidden"};
+  if(!r.ok||!j)throw {code:"unavailable",message:(j&&j.error)||String(r.status)};
+  if(body&&/^(set|patch|del)$/.test(a))setTimeout(kick,50);
+  return j;
+}
+function poll(fetcher,cb,ms){
+  let stop=false,last=null,t=null,busy=false;
+  const tick=async()=>{if(stop||busy)return;busy=true;clearTimeout(t);
+    try{const v=await fetcher();const k=JSON.stringify(v);if(k!==last){last=k;cb(v)}}catch(e){}
+    busy=false;if(!stop)t=setTimeout(tick,document.hidden?ms*4:ms)};
+  pollers.add(tick);t=setTimeout(tick,0);
+  return()=>{stop=true;clearTimeout(t);pollers.delete(tick)};
+}
+function makeServerApi(){
+  const get=p=>req("get&p="+encodeURIComponent(p)).then(j=>j.data);
+  return {
+    watchClasses(cb){return poll(()=>req("list&c=classes").then(j=>j.docs.map(d=>({id:d.id,...d.data}))),cb,15000)},
+    saveClass(c){const {id,...rest}=c;return req("set",{p:"classes/"+id,data:rest})},
+    deleteClass(id){return req("del",{p:"classes/"+id})},
+    deleteSheet(k){return req("del",{p:"sheets/"+k})},
+    watchSettings(cb){return poll(()=>get("settings/main"),cb,30000)},
+    saveSettings(o){return req("set",{p:"settings/main",data:o})},
+    getDoc:get,
+    setDoc(p,d){return req("set",{p,data:d})},
+    watchSheet(k,cb){return poll(()=>get("sheets/"+k),cb,10000)},
+    patchSheet(k,base,patch){return req("patch",{p:"sheets/"+k,data:{...base,scores:patch}})}
+  };
+}
+function setUser(u){S.user=u;S.canWrite=true;S.canAdmin=u.role==="admin"}
+function renderWho(){
+  const w=$("#who");if(!w)return;
+  if(S.backend!=="server"||!S.user){w.hidden=true;return}
+  w.hidden=false;w.innerHTML=`<span>${esc(S.user.name)} · ${S.user.role==="admin"?"អ្នកគ្រប់គ្រង":"គ្រូ"}</span><button id="btnOut">ចាកចេញ</button>`;
+  $("#btnOut").onclick=async()=>{try{await req("logout",{})}catch(e){}location.reload()};
+}
+function viewLogin(){
+  const su=S.needsSetup;
+  return `<section class="panel" style="max-width:420px;width:100%;margin:32px auto">
+    <h2>${su?"បង្កើតគណនីអ្នកគ្រប់គ្រង":"ចូលប្រើសៀវភៅពិន្ទុ"}</h2>
+    <p class="sub">${su?"នេះជាលើកដំបូង។ គណនីនេះគ្រប់គ្រងថ្នាក់ មុខវិជ្ជា និងគណនីគ្រូ។":"សូមប្រើឈ្មោះអ្នកប្រើ និងពាក្យសម្ងាត់ ដែលសាលាផ្ដល់ឱ្យ។"}</p>
+    <form id="fLogin" class="hon-form">
+      ${su?`<div class="field"><label for="lgName">ឈ្មោះពេញ</label><input class="inp" id="lgName" required></div>`:""}
+      <div class="field"><label for="lgUser">ឈ្មោះអ្នកប្រើ (អក្សរឡាតាំង)</label><input class="inp" id="lgUser" autocomplete="username" autocapitalize="off" required></div>
+      <div class="field"><label for="lgPass">ពាក្យសម្ងាត់</label><input class="inp" id="lgPass" type="password" autocomplete="${su?"new-password":"current-password"}" minlength="6" required></div>
+      <p id="lgErr" class="status err" style="margin:0"></p>
+      <button class="btn primary">${su?"បង្កើត និងចូល":"ចូល"}</button>
+    </form></section>`;
+}
+function bindLogin(){
+  $("#fLogin").addEventListener("submit",async e=>{
+    e.preventDefault();const err=$("#lgErr");err.textContent="";
+    const body={username:$("#lgUser").value.trim(),password:$("#lgPass").value};
+    if(S.needsSetup)body.name=$("#lgName").value.trim();
+    try{const j=await req(S.needsSetup?"setup":"login",body);setUser(j.user);S.needsSetup=false;start()}
+    catch(x){err.textContent=x&&x.code==="unavailable"?"ភ្ជាប់ម៉ាស៊ីនមេមិនបាន":(x&&x.message)||"ឈ្មោះអ្នកប្រើ ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ"}
+  });
+}
+function viewUsers(){
+  if(S.backend!=="server"||!S.canAdmin)return "";
+  if(!S.users){req("users").then(j=>{S.users=j.users;if(S.tab==="settings")render()}).catch(()=>{});return `<section class="panel" style="margin-top:20px"><h2>គណនីគ្រូ</h2><p class="hint">កំពុងផ្ទុក…</p></section>`}
+  const rows=S.users.map(u=>`<div class="cls-row" data-u="${esc(u.username)}" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 120px auto">
+    <span>${esc(u.name)}</span><span class="hint">${esc(u.username)}</span><span>${u.role==="admin"?"អ្នកគ្រប់គ្រង":"គ្រូ"}</span>
+    <span>${u.username===S.user.username?`<span class="hint">អ្នក</span>`:`<button class="btn sm danger" data-a="del">លុប</button>`}</span></div>`).join("");
+  return `<section class="panel" style="margin-top:20px">
+    <h2>គណនីគ្រូ</h2>
+    <p class="sub">គ្រូអាចបញ្ចូលពិន្ទុ កែបញ្ជីសិស្ស និងដាក់រូបថត។ មានតែអ្នកគ្រប់គ្រងទេ ដែលអាចបង្កើត/លុបថ្នាក់ កែមុខវិជ្ជា និងគ្រប់គ្រងគណនី។ ដើម្បីប្ដូរពាក្យសម្ងាត់ សូមបញ្ចូលឈ្មោះអ្នកប្រើដដែល ជាមួយពាក្យសម្ងាត់ថ្មី។</p>
+    <div id="userList">${rows}</div>
+    <form id="fUser" class="row" style="margin-top:12px">
+      <input class="inp" id="nuName" placeholder="ឈ្មោះពេញ" style="flex:1" required>
+      <input class="inp" id="nuUser" placeholder="ឈ្មោះអ្នកប្រើ ឧ. teacher1" autocapitalize="off" required>
+      <input class="inp" id="nuPass" type="password" placeholder="ពាក្យសម្ងាត់ (≥៦)" autocomplete="new-password" minlength="6">
+      <select class="inp" id="nuRole"><option value="teacher">គ្រូ</option><option value="admin">អ្នកគ្រប់គ្រង</option></select>
+      <button class="btn primary">រក្សាទុកគណនី</button>
+    </form><p id="nuErr" class="status err"></p></section>`;
+}
+function bindUsers(){
+  const f=$("#fUser");if(!f)return;
+  f.addEventListener("submit",async e=>{e.preventDefault();$("#nuErr").textContent="";
+    try{const j=await req("user_save",{name:$("#nuName").value.trim(),username:$("#nuUser").value.trim(),password:$("#nuPass").value,role:$("#nuRole").value});
+      S.users=j.users;toast("បានរក្សាទុកគណនី");render()}catch(x){$("#nuErr").textContent=(x&&x.message)||"រក្សាទុកមិនបាន"}});
+  $("#userList").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const u=b.closest("[data-u]").dataset.u;
+    arm(b,"ប្រាកដ?",async()=>{try{const j=await req("user_del",{username:u});S.users=j.users;render()}catch(x){toast((x&&x.message)||"លុបមិនបាន")}})});
+}
+
+/* ---------- wiring ---------- */
+let unSheet=null;
+function watchSheet(){
+  const k=sheetKey();if(k===S.sheetKey)return;
+  if(Object.keys(S.pending).length){clearTimeout(flushTimer);flush()}
+  if(unSheet)unSheet();S.sheet=null;S.sheetKey=k;S.inflight={};
+  if(!k)return;
+  unSheet=api.watchSheet(k,d=>{
+    if(S.sheetKey!==k)return;S.sheet=d;
+    if(S.tab==="scores"&&$("#grid")&&curClass())refreshComputed();
+    else if(S.tab==="honor"&&$("#hsWrap"))refreshHonor();
+    else render();
+  },e=>{if(e&&e.code==="unavailable"){unSheet=null;S.sheetKey=null;setTimeout(watchSheet,2000)}});
+}
+function onClasses(list){
+  S.classes=list.map(c=>({...c,students:Array.isArray(c.students)?c.students:[]})).sort((a,b)=>String(a.name).localeCompare(String(b.name),"km",{numeric:true}));
+  if(!S.classes.find(c=>c.id===S.sel.classId))S.sel.classId=S.classes[0]?S.classes[0].id:null;
+  const first=!S.ready.classes;S.ready.classes=true;
+  watchSheet();
+  // avoid stealing focus while typing in the students tab
+  const a=document.activeElement;
+  if(!first&&a&&a.matches&&a.matches(".srow input,.cls-row input,#honForm input,#honForm select")){renderPickers();if(S.tab==="honor")refreshHonor();return}
+  render();
+}
+function start(){
+  api.watchClasses(onClasses,()=>{});
+  api.watchSettings(d=>{S.settings=d;S.ready.settings=true;
+    const a=document.activeElement;if(a&&a.matches&&a.matches(".sub-row input,#honForm input")){if(S.tab==="honor")refreshHonor();return}render()},()=>{S.ready.settings=true;render()});
+}
+$("#selClass").addEventListener("change",e=>{S.sel.classId=e.target.value||null;S.rcStudent=null;saveUI();watchSheet();render()});
+$("#selPeriod").addEventListener("change",e=>{S.sel.period=e.target.value;saveUI();watchSheet();render()});
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{S.tab=t.dataset.tab;saveUI();render()}));
+$("#fileImport").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)importXlsx(f)});
+$("#filePhoto").addEventListener("change",e=>{const f=e.target.files[0];const t=e.target.dataset.target;e.target.value="";if(f&&t)uploadPhoto(f,t)});
+const typingIn=sel=>{const a=document.activeElement;return a&&a.matches&&a.matches(sel)};
+window.addEventListener("beforeunload",()=>{if(Object.keys(S.pending).length)flush()});
+renderPickers();
+
+(async()=>{
+  if(window.claude){
+    let db=null,user=null;
+    try{[db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")])}catch(e){}
+    if(db){api=makeDbApi(db);S.backend="db"}else{api=makeLocalApi();S.backend="local"}
+    if(user&&db){try{const w=await user.can("data.write");if(w===false)S.canWrite=false}catch(e){}}
+    start();return;
+  }
+  // own hosting: use api.php when it answers, otherwise keep data in this browser
+  if(location.protocol.startsWith("http")){
+    try{const me=await req("me");api=makeServerApi();S.backend="server";
+      if(me.user){setUser(me.user);start()}else{S.needsSetup=!!me.needsSetup;render()}
+      return}catch(e){}
+  }
+  api=makeLocalApi();S.backend="local";start();
+})();
+})();
+</script>
+
+</body>
+</html>
